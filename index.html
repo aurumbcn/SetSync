@@ -1,0 +1,3317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tempo trainer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #0284c7;
+            --primary-bright: #0ea5e9;
+            --primary-dark: #0369a1;
+            --primary-deep: #082f49;
+            --aqua: #06b6d4;
+            --aqua-light: #cffafe;
+            --primary-light: #e0f2fe;
+            --bg-top: #bae6fd;
+            --bg-mid: #e0f2fe;
+            --bg-bottom: #f0f9ff;
+            --card: rgba(255, 255, 255, 0.90);
+            --surface: #f8fafc;
+            --text: #0f172a;
+            --muted: #475569;
+            --border: rgba(14, 165, 233, 0.18);
+            --border-strong: #93c5fd;
+            --success: #0d9488;
+            --success-dark: #0f766e;
+            --danger: #e11d48;
+            --warning: #0284c7;
+            --shadow-sm: 0 4px 14px rgba(3, 105, 161, 0.06);
+            --shadow-md: 0 14px 30px -6px rgba(2, 132, 199, 0.16), 0 4px 12px -4px rgba(8, 47, 73, 0.06);
+            --shadow-lg: 0 28px 60px -14px rgba(8, 47, 73, 0.24), 0 0 0 1px rgba(255, 255, 255, 0.75);
+            --radius-xl: 26px;
+            --radius-lg: 18px;
+            --radius-md: 13px;
+            --radius-sm: 9px;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #e0f2fe;
+            background-image:
+                radial-gradient(ellipse 90% 55% at 15% 0%, rgba(6, 182, 212, 0.34) 0%, transparent 62%),
+                radial-gradient(ellipse 80% 50% at 88% 8%, rgba(2, 132, 199, 0.26) 0%, transparent 60%),
+                radial-gradient(circle at 50% 45%, rgba(224, 242, 254, 0.85) 0%, rgba(240, 249, 255, 0.96) 75%),
+                repeating-linear-gradient(
+                    -12deg,
+                    rgba(2, 132, 199, 0.035) 0px,
+                    rgba(2, 132, 199, 0.035) 2px,
+                    transparent 2px,
+                    transparent 28px
+                );
+            background-attachment: fixed;
+            color: var(--text);
+            margin: 0;
+            padding: 28px 16px 56px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        /* Franjas sutiles tipo carril de piscina en los laterales superiores */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                linear-gradient(180deg, rgba(8, 47, 73, 0.06) 0%, transparent 260px),
+                radial-gradient(circle at 80% 85%, rgba(6, 182, 212, 0.14) 0%, transparent 45%);
+        }
+
+        .container {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.92) 100%);
+            backdrop-filter: blur(18px) saturate(130%);
+            -webkit-backdrop-filter: blur(18px) saturate(130%);
+            max-width: 740px;
+            width: 100%;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.92);
+            padding: 34px 32px;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* Línea de corcheras / agua en la parte superior */
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #082f49 0%, #0284c7 35%, #06b6d4 70%, #0d9488 100%);
+        }
+
+        /* Reflejo acuático sutil en esquina superior derecha */
+        .container::after {
+            content: "";
+            position: absolute;
+            top: -80px;
+            right: -80px;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.14) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        h1 {
+            margin: 0 0 18px 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #082f49 0%, #0369a1 55%, #0891b2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        p.subtitle {
+            margin: 0 0 24px 0;
+            color: var(--muted);
+            font-size: 0.94rem;
+            line-height: 1.55;
+        }
+
+        /* Barra superior de configuración: Largo y Nivel */
+        .pool-selector-bar {
+            background:
+                radial-gradient(circle at 100% 0%, rgba(6, 182, 212, 0.14) 0%, transparent 55%),
+                linear-gradient(135deg, #f0f9ff 0%, #ecfeff 100%);
+            border: 1.5px solid rgba(2, 132, 199, 0.24);
+            border-radius: var(--radius-lg);
+            padding: 15px 18px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            z-index: 1;
+        }
+
+        .pool-selector-label {
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--primary-deep);
+            letter-spacing: -0.01em;
+        }
+
+        .pool-toggle-group,
+        .level-toggle-group {
+            display: inline-flex;
+            background: rgba(203, 213, 225, 0.55);
+            padding: 3px;
+            border-radius: 12px;
+            gap: 3px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+        }
+
+        .pool-btn,
+        .level-btn {
+            border: none;
+            background: transparent;
+            color: #334155;
+            padding: 7px 14px;
+            border-radius: 9px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: auto;
+            transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .pool-btn:hover:not(.active),
+        .level-btn:hover:not(.active) {
+            color: var(--primary-deep);
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .pool-btn.active {
+            background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.32);
+        }
+
+        .level-btn.active {
+            background: linear-gradient(135deg, #082f49 0%, #0284c7 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(3, 105, 161, 0.32);
+        }
+
+
+        .mode-toggle-group {
+            display: inline-flex;
+            background: rgba(203, 213, 225, 0.55);
+            padding: 3px;
+            border-radius: 12px;
+            gap: 3px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+        }
+
+        .mode-btn {
+            border: none;
+            background: transparent;
+            color: #334155;
+            padding: 7px 14px;
+            border-radius: 9px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: auto;
+            transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .mode-btn:hover:not(.active) {
+            color: var(--primary-deep);
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #0d9488 0%, #0284c7 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+        }
+
+        .calculated-duration-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ffffff;
+            border: 1px solid #bae6fd;
+            color: var(--primary-deep);
+            padding: 8px 13px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .section-title {
+            font-size: 0.82rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            color: var(--primary-dark);
+            margin: 28px 0 14px 0;
+            padding-bottom: 9px;
+            border-bottom: 2px solid transparent;
+            border-image: linear-gradient(90deg, rgba(2, 132, 199, 0.45), rgba(6, 182, 212, 0.15), transparent) 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Tarjetas de bloques */
+        .blocks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .block-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fcff 100%);
+            border: 1.5px solid rgba(14, 165, 233, 0.2);
+            border-left: 4px solid #0284c7;
+            border-radius: var(--radius-lg);
+            padding: 19px;
+            box-shadow: var(--shadow-sm);
+            transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+        }
+
+        .block-card:hover {
+            border-color: rgba(6, 182, 212, 0.48);
+            border-left-color: #06b6d4;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 11px;
+            border-bottom: 1px solid rgba(224, 242, 254, 0.9);
+            gap: 10px;
+        }
+
+        .block-badge {
+            font-weight: 800;
+            font-size: 0.92rem;
+            color: var(--primary-deep);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .block-name-input {
+            border: 1px solid transparent;
+            background: rgba(240, 249, 255, 0.85);
+            font-weight: 700;
+            font-size: 0.94rem;
+            color: var(--text);
+            padding: 6px 10px;
+            border-radius: 9px;
+            width: 100%;
+            max-width: 260px;
+            transition: all 0.16s ease;
+        }
+
+        .block-name-input:hover {
+            border-color: #7dd3fc;
+            background: #ffffff;
+        }
+
+        .block-name-input:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.18);
+            outline: none;
+        }
+
+        .btn-remove {
+            background: #fff1f2;
+            color: var(--danger);
+            border: 1px solid #fecdd3;
+            border-radius: 9px;
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: auto;
+            transition: all 0.16s ease;
+        }
+
+        .btn-remove:hover {
+            background: #ffe4e6;
+            border-color: #fda4af;
+        }
+
+        .warmup-box {
+            background: linear-gradient(135deg, rgba(240, 249, 255, 0.85) 0%, rgba(236, 254, 255, 0.65) 100%);
+            border: 1px solid rgba(125, 211, 252, 0.45);
+            border-radius: var(--radius-md);
+            padding: 14px 15px;
+            margin-bottom: 12px;
+        }
+
+        .warmup-time-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        /* Ritmos agrupados */
+        .pace-levels-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .pace-group-card {
+            background: #ffffff;
+            border: 1px solid rgba(125, 211, 252, 0.65);
+            border-radius: var(--radius-md);
+            padding: 13px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 9px;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.05);
+        }
+
+        @media (max-width: 600px) {
+            .pace-group-card {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pace-group-header {
+            grid-column: 1 / -1;
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary-dark);
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0f2fe;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pace-lvl-btn {
+            background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--primary-deep);
+            border: 1px solid #bae6fd;
+            border-radius: 11px;
+            padding: 10px 12px;
+            text-align: left;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .pace-lvl-btn:hover,
+        .pace-lvl-btn.active {
+            background: linear-gradient(135deg, #0369a1 0%, #0284c7 60%, #06b6d4 100%);
+            color: #ffffff;
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.32);
+        }
+
+        .pace-lvl-btn:hover .pace-lvl-desc,
+        .pace-lvl-btn.active .pace-lvl-desc {
+            color: #e0f2fe;
+        }
+
+        .pace-lvl-val {
+            display: block;
+            font-size: 0.86rem;
+            font-weight: 800;
+        }
+
+        .pace-lvl-desc {
+            display: block;
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        details.other-levels-accordion {
+            margin-top: 10px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        details.other-levels-accordion > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 9px 14px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            background: #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.15s ease;
+        }
+
+        details.other-levels-accordion > summary:hover {
+            background: #e2e8f0;
+        }
+
+        details.other-levels-accordion > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details.other-levels-accordion > summary::after {
+            content: "▾";
+            font-size: 0.95rem;
+            transition: transform 0.2s ease;
+            color: var(--primary-dark);
+        }
+
+        details.other-levels-accordion:not([open]) > summary::after {
+            transform: rotate(-90deg);
+        }
+
+        .other-levels-body {
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .other-levels-body .pace-group-card {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @media (max-width: 600px) {
+            .other-levels-body .pace-group-card {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        details.custom-beep-accordion {
+            margin-top: 12px;
+            background: #f8fafc;
+            border: 1px solid rgba(14, 165, 233, 0.22);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        details.custom-beep-accordion > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 11px 15px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: all 0.18s ease;
+        }
+
+        details.custom-beep-accordion > summary:hover {
+            background: #bae6fd;
+        }
+
+        details.custom-beep-accordion[open] {
+            border-color: #0284c7;
+            box-shadow: 0 5px 14px rgba(3, 105, 161, 0.16);
+        }
+
+        details.custom-beep-accordion[open] > summary,
+        details.custom-beep-accordion.custom-active > summary {
+            background: linear-gradient(135deg, #082f49 0%, #0284c7 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(3, 105, 161, 0.28);
+        }
+
+        details.custom-beep-accordion[open] > summary::after,
+        details.custom-beep-accordion.custom-active > summary::after {
+            color: #ffffff;
+        }
+
+        details.custom-beep-accordion > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details.custom-beep-accordion > summary::after {
+            content: "▾";
+            font-size: 0.95rem;
+            transition: transform 0.2s ease;
+            color: var(--primary-dark);
+        }
+
+        details.custom-beep-accordion:not([open]) > summary::after {
+            transform: rotate(-90deg);
+        }
+
+        .custom-beep-box {
+            padding: 14px 15px 16px;
+            border-top: 1px solid #e0f2fe;
+            background: #ffffff;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 580px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.82rem;
+            color: #334155;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text);
+            background: #ffffff;
+            transition: border-color 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.18);
+        }
+
+        .block-meta {
+            margin-top: 13px;
+            padding-top: 11px;
+            border-top: 1px solid #e0f2fe;
+            font-size: 0.82rem;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .block-meta strong {
+            color: var(--primary-deep);
+        }
+
+        .btn-add-block {
+            background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+            color: var(--primary-dark);
+            border: 1.5px dashed #38bdf8;
+            padding: 12px 15px;
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.18s ease;
+        }
+
+        .btn-add-block:hover {
+            background: #e0f2fe;
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .summary-box {
+            background:
+                radial-gradient(circle at 100% 50%, rgba(6, 182, 212, 0.18) 0%, transparent 60%),
+                linear-gradient(135deg, #e0f2fe 0%, #ecfeff 100%);
+            border: 1.5px solid #7dd3fc;
+            border-left: 5px solid #0284c7;
+            padding: 17px 20px;
+            border-radius: var(--radius-lg);
+            margin: 22px 0;
+            font-size: 0.93rem;
+            line-height: 1.7;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            z-index: 1;
+        }
+
+        .summary-box strong {
+            color: var(--primary-deep);
+        }
+
+        /* Plantillas guardadas */
+        .templates-bar {
+            background: linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(240, 249, 255, 0.85) 100%);
+            border: 1.5px solid rgba(14, 165, 233, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            z-index: 1;
+        }
+
+        .templates-top {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .templates-title {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .templates-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .mini-btn {
+            background: #ffffff;
+            color: var(--text);
+            border: 1px solid #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 9px;
+            font-size: 0.79rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: auto;
+            transition: all 0.16s ease;
+        }
+
+        .mini-btn:hover {
+            background: #f0f9ff;
+            border-color: #7dd3fc;
+            color: var(--primary-deep);
+        }
+
+        .mini-btn.primary {
+            background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 3px 10px rgba(2, 132, 199, 0.25);
+        }
+
+        .mini-btn.primary:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        .saved-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-top: 6px;
+        }
+
+        .saved-chip {
+            background: #ffffff;
+            color: var(--primary-dark);
+            border: 1px solid #bae6fd;
+            border-radius: 999px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08);
+            transition: all 0.15s ease;
+        }
+
+        .saved-chip:hover {
+            background: #e0f2fe;
+            transform: translateY(-1px);
+        }
+
+        .saved-chip span.del-tpl {
+            color: var(--danger);
+            font-weight: 800;
+            cursor: pointer;
+            padding-left: 2px;
+        }
+
+        /* Acordeones */
+        details.accordion {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fcff 100%);
+            border: 1.5px solid rgba(14, 165, 233, 0.18);
+            border-radius: var(--radius-lg);
+            margin-top: 13px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            z-index: 1;
+        }
+
+        details.accordion[open] {
+            border-color: #7dd3fc;
+            box-shadow: var(--shadow-md);
+        }
+
+        details.accordion > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 15px 19px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--primary-deep);
+            background: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.16s ease;
+        }
+
+        details.accordion > summary:hover {
+            background: #e0f2fe;
+        }
+
+        details.accordion > summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details.accordion > summary::after {
+            content: "▾";
+            font-size: 1rem;
+            transition: transform 0.2s ease;
+            color: var(--primary-dark);
+        }
+
+        details.accordion:not([open]) > summary::after {
+            transform: rotate(-90deg);
+        }
+
+        details.accordion .accordion-body {
+            padding: 17px 19px;
+            border-top: 1px solid #e0f2fe;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            font-size: 0.84rem;
+            padding: 10px 12px;
+            background: #f0f9ff;
+            border: 1.5px dashed #38bdf8;
+            border-radius: 10px;
+            margin-top: 4px;
+            cursor: pointer;
+        }
+
+        .track-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .track-item {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.82rem;
+        }
+
+        .track-title {
+            font-weight: 700;
+            color: var(--text);
+            flex: 1;
+            min-width: 150px;
+            word-break: break-word;
+        }
+
+        .track-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .track-trim {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.76rem;
+            color: var(--muted);
+            margin-bottom: 0;
+        }
+
+        .track-trim input {
+            width: 58px;
+            padding: 4px 6px;
+            font-size: 0.78rem;
+            border-radius: 7px;
+            border: 1px solid var(--border-strong);
+        }
+
+        .icon-btn {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            padding: 4px 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: auto;
+        }
+
+        .icon-btn:hover:not(:disabled) {
+            background: #e0f2fe;
+        }
+
+        .icon-btn.del {
+            background: #fff1f2;
+            border-color: #fecdd3;
+            color: var(--danger);
+        }
+
+        .slider-group {
+            background: #f8fafc;
+            border: 1px solid rgba(14, 165, 233, 0.16);
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: #0284c7;
+            cursor: pointer;
+        }
+
+        .slider-val {
+            font-weight: 800;
+            font-size: 0.85rem;
+            min-width: 54px;
+            text-align: right;
+            color: var(--primary-dark);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 0.88rem;
+            cursor: pointer;
+            line-height: 1.45;
+            color: #1e293b;
+        }
+
+        .checkbox-group input {
+            width: 17px;
+            height: 17px;
+            margin-top: 2px;
+            accent-color: #0284c7;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .sub-options {
+            margin-left: 26px;
+            padding-left: 14px;
+            border-left: 2px solid #7dd3fc;
+            margin-bottom: 14px;
+        }
+
+        .progress-wrap {
+            display: none;
+            margin-top: 16px;
+            background: #f0f9ff;
+            border-radius: 12px;
+            padding: 13px 15px;
+            border: 1px solid #7dd3fc;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: #e0f2fe;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0284c7 0%, #06b6d4 100%);
+            transition: width 0.18s ease;
+        }
+
+        .progress-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        button.main-btn {
+            width: 100%;
+            padding: 15px 18px;
+            border: none;
+            border-radius: 13px;
+            font-size: 0.98rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        button.main-btn:active:not(:disabled) {
+            transform: scale(0.99);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #082f49 0%, #0284c7 52%, #06b6d4 100%);
+            color: #ffffff;
+            box-shadow: 0 10px 24px -5px rgba(2, 132, 199, 0.45);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            filter: brightness(1.06);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px -5px rgba(2, 132, 199, 0.52);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+            color: var(--primary-deep);
+            border: 1.5px solid #7dd3fc;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e0f2fe;
+            border-color: #0284c7;
+        }
+
+        .result-box {
+            margin-top: 24px;
+            padding: 22px;
+            background: linear-gradient(180deg, #f0f9ff 0%, #ecfeff 100%);
+            border: 1.5px solid #7dd3fc;
+            border-radius: var(--radius-lg);
+            display: none;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            z-index: 1;
+        }
+
+        audio {
+            width: 100%;
+            margin: 14px 0;
+            border-radius: 10px;
+        }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 14px 10px 40px;
+            }
+            .container {
+                padding: 24px 16px;
+                border-radius: 20px;
+            }
+            h1 {
+                font-size: 1.48rem;
+            }
+            .download-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn-download {
+            display: inline-block;
+            width: 100%;
+            padding: 12px 14px;
+            background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 11px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 14px rgba(13, 148, 136, 0.28);
+            transition: all 0.16s ease;
+        }
+
+        .btn-download:hover {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+        }
+
+        .btn-download.alt {
+            background: linear-gradient(135deg, #0369a1 0%, #06b6d4 100%);
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.28);
+        }
+
+        .saved-sessions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .saved-session-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fcff 100%);
+            border: 1.5px solid rgba(14, 165, 233, 0.2);
+            border-left: 4px solid #06b6d4;
+            border-radius: var(--radius-lg);
+            padding: 15px 17px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .saved-session-card:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .saved-session-card.active-session {
+            border-color: #0284c7;
+            border-left-color: #082f49;
+            background: linear-gradient(135deg, #f0f9ff 0%, #ecfeff 100%);
+        }
+
+        .saved-session-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .saved-session-name {
+            font-weight: 800;
+            font-size: 0.96rem;
+            color: var(--primary-deep);
+        }
+
+        .saved-session-meta {
+            font-size: 0.79rem;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .saved-session-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .saved-session-audio {
+            width: 100%;
+            margin: 2px 0 0 0;
+            height: 36px;
+        }
+
+        .info-small {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Tempo trainer</h1>
+
+    <!-- SELECTOR DE PISCINA 25m / 50m Y NIVEL -->
+    <div class="pool-selector-bar">
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+            <span class="pool-selector-label">📏 Largo de piscina:</span>
+            <div class="pool-toggle-group" role="group" aria-label="Tipo de piscina">
+                <button type="button" class="pool-btn active" id="poolBtn25" onclick="setPoolLength(25)">Piscina 25 m</button>
+                <button type="button" class="pool-btn" id="poolBtn50" onclick="setPoolLength(50)">Piscina 50 m</button>
+            </div>
+        </div>
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+            <span class="pool-selector-label">🏅 Nivel:</span>
+            <div class="level-toggle-group" role="group" aria-label="Nivel de nadador">
+                <button type="button" class="level-btn active" id="levelBtnPrincipiante" onclick="setSwimmerLevel('Principiante')">Principiante</button>
+                <button type="button" class="level-btn" id="levelBtnIntermedio" onclick="setSwimmerLevel('Intermedio')">Intermedio</button>
+                <button type="button" class="level-btn" id="levelBtnAtleta" onclick="setSwimmerLevel('Atleta')">Atleta</button>
+            </div>
+        </div>
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+            <span class="pool-selector-label">🎯 Crear bloque por:</span>
+            <div class="mode-toggle-group" role="group" aria-label="Modo de creación de bloque">
+                <button type="button" class="mode-btn active" id="globalModeBtnTime" onclick="setGlobalBlockMode('time')">⏱️ Por tiempo</button>
+                <button type="button" class="mode-btn" id="globalModeBtnDistance" onclick="setGlobalBlockMode('distance')">📏 Por distancia</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. PRINCIPAL: ESTRUCTURA DE LA SESIÓN -->
+    <div class="section-title">1. Estructura de la sesión</div>
+
+    <div class="blocks-list" id="blocksContainer"></div>
+
+    <div class="grid-2" style="gap: 10px; margin-top: 10px;">
+        <button type="button" class="btn-add-block" onclick="addBlock('swim')">+ Añadir bloque de nado</button>
+        <button type="button" class="btn-add-block" style="border-color: #64748b; color: #334155;" onclick="addBlock('rest')">+ Añadir pausa / descanso</button>
+    </div>
+
+    <div class="summary-box" id="summaryBox"></div>
+
+    <!-- DESPLEGABLE 1: MÚSICA DE FONDO -->
+    <details class="accordion">
+        <summary>Lista de canciones de fondo (Opcional)</summary>
+        <div class="accordion-body">
+            <div class="music-box" style="margin-bottom:0; background:transparent; border:none; padding:0;">
+                <label class="checkbox-group" style="margin-bottom: 6px;">
+                    <input type="checkbox" id="enableMusic" onchange="toggleMusicOptions()">
+                    <span><strong>Mezclar canciones de fondo en bucle</strong> (con lista editable, orden aleatorio, fundidos y recorte de inicio)</span>
+                </label>
+
+                <div id="musicOptionsBlock" style="display: none; margin-top: 10px;">
+                    <label for="musicFiles">Añadir canciones a la lista (puedes añadir en varias tandas)</label>
+                    <input type="file" id="musicFiles" accept="audio/*" multiple onchange="appendMusicFiles(this.files)">
+
+                    <div class="track-list" id="trackListContainer"></div>
+
+                    <div class="grid-2" style="margin-top: 12px;">
+                        <label class="checkbox-group" style="margin-bottom: 0;">
+                            <input type="checkbox" id="shuffleMusic">
+                            <span>Modo aleatorio (<em>shuffle</em>)</span>
+                        </label>
+                        <div class="slider-group" style="margin-bottom: 0; padding: 8px 12px;">
+                            <label for="crossfadeSec" style="margin-bottom:2px;">Fundido entre canciones (<em>crossfade</em>)</label>
+                            <div class="slider-row">
+                                <input type="range" id="crossfadeSec" min="0" max="4" step="0.5" value="1.5" oninput="document.getElementById('crossfadeVal').textContent = this.value+'s'">
+                                <span class="slider-val" id="crossfadeVal">1.5s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="margin-top: 10px;">
+                        <div class="slider-group" style="margin-bottom: 0;">
+                            <label for="musicVol">Volumen de la música</label>
+                            <div class="slider-row">
+                                <input type="range" id="musicVol" min="0.05" max="0.8" step="0.05" value="0.25" oninput="document.getElementById('musicVolVal').textContent = Math.round(this.value*100)+'%'">
+                                <span class="slider-val" id="musicVolVal">25%</span>
+                            </div>
+                        </div>
+                        <div class="slider-group" style="margin-bottom: 0;">
+                            <label for="duckingFactor">Atenuar música al hablar/pitar</label>
+                            <div class="slider-row">
+                                <input type="range" id="duckingFactor" min="0.1" max="1.0" step="0.05" value="0.35" oninput="document.getElementById('duckingVal').textContent = Math.round(this.value*100)+'%'">
+                                <span class="slider-val" id="duckingVal">35%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- DESPLEGABLE 2: SONIDO Y SALUD AUDITIVA -->
+    <details class="accordion">
+        <summary>Frecuencia, volumen y protección auditiva</summary>
+        <div class="accordion-body">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="freq">Frecuencia base del pitido (oído cómodo)</label>
+                    <select id="freq">
+                        <option value="650">650 Hz (Muy suave / Cálido)</option>
+                        <option value="800" selected>800 Hz (Óptimo: claro y sin fatiga)</option>
+                        <option value="950">950 Hz (Equilibrado estándar)</option>
+                        <option value="1200">1200 Hz (Algo más brillante)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="beepDuration">Duración del pitido</label>
+                    <select id="beepDuration">
+                        <option value="0.2">0.20 s (Corto)</option>
+                        <option value="0.32" selected>0.32 s (Medio recomendado)</option>
+                        <option value="0.45">0.45 s (Largo)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="slider-group">
+                    <label for="beepVol">Volumen de los pitidos</label>
+                    <div class="slider-row">
+                        <input type="range" id="beepVol" min="0.2" max="1.0" step="0.05" value="0.75" oninput="document.getElementById('beepVolVal').textContent = Math.round(this.value*100)+'%'">
+                        <span class="slider-val" id="beepVolVal">75%</span>
+                    </div>
+                </div>
+                <div class="slider-group">
+                    <label for="voiceVol">Volumen de la voz guía</label>
+                    <div class="slider-row">
+                        <input type="range" id="voiceVol" min="0.4" max="1.5" step="0.05" value="1.15" oninput="document.getElementById('voiceVolVal').textContent = Math.round(this.value*100)+'%'">
+                        <span class="slider-val" id="voiceVolVal">115%</span>
+                    </div>
+                </div>
+            </div>
+
+            <label class="checkbox-group" style="margin-bottom:0;">
+                <input type="checkbox" id="softLimiter" checked>
+                <span><strong>Limitador de picos suave (<em>limiter</em>):</strong> evita saturación o golpes bruscos cuando coinciden música, voz y pitidos</span>
+            </label>
+        </div>
+    </details>
+
+    <!-- DESPLEGABLE 3: AVISOS POR VOZ E HITOS -->
+    <details class="accordion">
+        <summary>Avisos de voz, ritmo e hitos</summary>
+        <div class="accordion-body">
+            <input type="hidden" id="localVoiceBasePath" value="./assets/voices/es">
+            <div class="info-small" id="localVoiceStatus" style="margin-bottom: 12px;">Cargando automáticamente los clips de voz desde <strong>./assets/voices/es</strong>...</div>
+
+            <label class="checkbox-group">
+                <input type="checkbox" id="doubleBeepEvery4" checked onchange="toggleVoiceOptions()">
+                <span><strong>Doble pitido cada 4 largos (cada 100 metros)</strong></span>
+            </label>
+
+            <div class="sub-options" id="voiceOptionsBlock">
+                <label class="checkbox-group">
+                    <input type="checkbox" id="announcePace" checked>
+                    <span>Decir con voz el ritmo medio actual tras el doble pitido</span>
+                </label>
+                <label class="checkbox-group" style="margin-bottom: 0;">
+                    <input type="checkbox" id="announceDistance" checked>
+                    <span>Decir también la distancia acumulada cada 100 m</span>
+                </label>
+            </div>
+
+            <label class="checkbox-group">
+                <input type="checkbox" id="announceHalfway" checked>
+                <span><strong>Aviso a mitad de sesión:</strong> voz al alcanzar la mitad del tiempo total con los metros acumulados</span>
+            </label>
+
+            <label class="checkbox-group">
+                <input type="checkbox" id="announceBlockChanges" checked>
+                <span><strong>Aviso de bloque nuevo, pausa y reiniciar pausa:</strong> reproduce las locuciones de voz (o tonos diferenciados si faltan) y cuenta atrás en los últimos 3 segundos de las pausas</span>
+            </label>
+
+            <label class="checkbox-group">
+                <input type="checkbox" id="announceFinalTotal" checked>
+                <span><strong>Aviso final al terminar el tiempo:</strong> triple pitido y distancia total recorrida</span>
+            </label>
+
+            <label class="checkbox-group" style="margin-bottom:0;">
+                <input type="checkbox" id="countdownStart" checked>
+                <span>Cuenta atrás inicial con voz (diez, nueve, ocho, siete, seis, cinco, cuatro, tres, dos, uno, cero)</span>
+            </label>
+        </div>
+    </details>
+
+    <!-- 2. GUARDAR SESIÓN (DESPUÉS DE AVISOS DE VOZ) -->
+    <div class="section-title">2. Guardar sesión</div>
+    <div class="templates-bar" style="margin-bottom: 18px;">
+        <div class="templates-top" style="margin-bottom: 0;">
+            <div class="templates-actions">
+                <button type="button" class="mini-btn primary" onclick="saveCurrentTemplate()">+ Guardar sesión</button>
+                <button type="button" class="mini-btn" onclick="exportTemplateJSON()">📤 Exportar JSON</button>
+                <button type="button" class="mini-btn" onclick="document.getElementById('importJsonInput').click()">📥 Importar JSON</button>
+                <input type="file" id="importJsonInput" accept=".json,application/json" style="display:none" onchange="importTemplateJSON(this.files[0])">
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. ESCOGER SESIÓN GUARDADA Y GENERAR AUDIO -->
+    <div class="section-title">3. Escoger sesión guardada y generar audio</div>
+    <div class="templates-bar" style="margin-bottom: 18px;">
+        <div class="form-group" style="margin-bottom: 0;">
+            <label for="savedSessionSelect">Escoge una sesión de la lista guardada</label>
+            <select id="savedSessionSelect" onchange="selectSavedSessionByIndex(this.value)"></select>
+        </div>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+        <div class="progress-label">
+            <span id="progressText">Preparando audio...</span>
+            <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button type="button" class="main-btn btn-secondary" id="previewBtn" onclick="previewBeepAndVoice()">🔊 Escuchar prueba de pitido + voz</button>
+        <button type="button" class="main-btn btn-primary" id="generateBtn" onclick="generateAudio()">⚙️ Generar Audio Descargable</button>
+    </div>
+
+    <div class="result-box" id="resultBox">
+        <strong style="color: #0f172a; font-size: 1.05rem;">¡Tu sesión de audio está lista!</strong>
+        <audio id="audioPlayer" controls></audio>
+        <div class="download-grid">
+            <a id="downloadWavLink" class="btn-download" download="sesion_natacion.wav">⬇️ Descargar .WAV (Sin pérdida)</a>
+            <a id="downloadCompressedLink" class="btn-download alt" style="display:none;" download="sesion_natacion.webm">⬇️ Descargar comprimido (.WEBM)</a>
+        </div>
+        <div class="info-small" id="fileInfo"></div>
+    </div>
+
+    <!-- 4. LISTADO DE SESIONES (SIN AUDIO) -->
+    <div class="section-title">4. Listado de sesiones (SIN AUDIO)</div>
+    <div class="saved-sessions-list" id="savedSessionsAudioList"></div>
+</div>
+
+<script>
+    const SAMPLE_RATE = 16000;
+    const STORAGE_KEY = "tempo_trainer_25m_templates_v1";
+    let poolLength = 25; // 25 o 50 metros
+    let swimmerLevel = 'Principiante'; // 'Principiante' | 'Intermedio' | 'Atleta'
+    let defaultBlockMode = 'time'; // 'time' | 'distance'
+
+    function formatMinutesAndSeconds(totalSec) {
+        const rounded = Math.round(totalSec);
+        const mins = Math.floor(rounded / 60);
+        const secs = rounded % 60;
+        if (mins === 0) return `${secs} s`;
+        if (secs === 0) return `${mins} min`;
+        return `${mins} min ${secs < 10 ? '0' : ''}${secs} s`;
+    }
+
+    function computeBlockDurationSec(blk) {
+        if (blk.type === 'swim' && blk.mode === 'distance') {
+            const dist = Math.max(50, Number(blk.distanceMeters) || 200);
+            const targetLaps = Math.max(1, Math.round(dist / poolLength));
+            let total = 0;
+            for (let i = 0; i < targetLaps; i++) {
+                const progress = targetLaps > 1 ? Math.min(1, i / (targetLaps - 1)) : 0;
+                total += (Number(blk.intervalSec) || 25) + ((Number(blk.endIntervalSec) || Number(blk.intervalSec) || 25) - (Number(blk.intervalSec) || 25)) * progress;
+            }
+            return total;
+        }
+        return (Number(blk.durationMin) || 0) * 60;
+    }
+
+    function recalculateBlockDurationFromDistance(blk) {
+        if (!blk || blk.type !== 'swim' || blk.mode !== 'distance') return;
+        const sec = computeBlockDurationSec(blk);
+        blk.durationMin = +(sec / 60).toFixed(4);
+    }
+
+    function syncGlobalModeButtons() {
+        const swimBlocks = blocks.filter(b => b.type === 'swim');
+        const allSame = swimBlocks.length > 0 && swimBlocks.every(b => (b.mode || defaultBlockMode) === (swimBlocks[0].mode || defaultBlockMode));
+        const commonMode = allSame ? (swimBlocks[0].mode || defaultBlockMode) : defaultBlockMode;
+        const btnTime = document.getElementById('globalModeBtnTime');
+        const btnDist = document.getElementById('globalModeBtnDistance');
+        if (btnTime) btnTime.classList.toggle('active', commonMode === 'time');
+        if (btnDist) btnDist.classList.toggle('active', commonMode === 'distance');
+    }
+
+    function setGlobalBlockMode(mode) {
+        if (mode !== 'time' && mode !== 'distance') return;
+        defaultBlockMode = mode;
+        blocks.forEach(blk => {
+            if (blk.type === 'swim') {
+                applyModeToBlockObject(blk, mode);
+            }
+        });
+        syncGlobalModeButtons();
+        renderBlocks();
+    }
+
+    function applyModeToBlockObject(blk, mode) {
+        if (!blk || blk.type !== 'swim') return;
+        const prevMode = blk.mode || 'time';
+        if (prevMode === mode) return;
+        if (mode === 'distance') {
+            const currentSec = (Number(blk.durationMin) || 10) * 60;
+            const avgInt = ((Number(blk.intervalSec) || 25) + (Number(blk.endIntervalSec) || Number(blk.intervalSec) || 25)) / 2;
+            const estMeters = avgInt > 0 ? Math.round(((currentSec / avgInt) * poolLength) / 50) * 50 : 200;
+            blk.distanceMeters = Math.min(800, Math.max(50, estMeters || 200));
+            blk.mode = 'distance';
+            recalculateBlockDurationFromDistance(blk);
+        } else {
+            const currentSec = computeBlockDurationSec(blk);
+            blk.mode = 'time';
+            blk.durationMin = Math.max(0.5, +(currentSec / 60).toFixed(1));
+        }
+    }
+
+    function setBlockMode(blockId, mode) {
+        if (mode !== 'time' && mode !== 'distance') return;
+        const blk = blocks.find(b => b.id === blockId);
+        if (!blk || blk.type !== 'swim') return;
+        applyModeToBlockObject(blk, mode);
+        syncGlobalModeButtons();
+        renderBlocks();
+    }
+
+    function updateBlockDistance(blockId, metersVal) {
+        const blk = blocks.find(b => b.id === blockId);
+        if (!blk) return;
+        const meters = parseInt(metersVal, 10);
+        if (isNaN(meters) || meters <= 0) return;
+        blk.distanceMeters = meters;
+        recalculateBlockDurationFromDistance(blk);
+        renderBlocks(true);
+    }
+
+    function buildDistanceOptionsHtml(selectedMeters) {
+        let opts = '';
+        for (let m = 50; m <= 800; m += 50) {
+            const sel = (Number(selectedMeters) === m) ? ' selected' : '';
+            opts += `<option value="${m}"${sel}>${m} m</option>`;
+        }
+        return opts;
+    }
+
+    function syncTopLevelButtons() {
+        const swimBlocks = blocks.filter(b => b.type === 'swim');
+        const allSame = swimBlocks.length > 0 && swimBlocks.every(b => (b.level || swimmerLevel) === (swimBlocks[0].level || swimmerLevel));
+        const commonLevel = allSame ? (swimBlocks[0].level || swimmerLevel) : null;
+        ['Principiante', 'Intermedio', 'Atleta'].forEach(lvl => {
+            const btn = document.getElementById(`levelBtn${lvl}`);
+            if (btn) btn.classList.toggle('active', commonLevel === lvl);
+        });
+    }
+
+    function setBlockLevel(blockId, level) {
+        if (!['Principiante', 'Intermedio', 'Atleta'].includes(level)) return;
+        const blk = blocks.find(b => b.id === blockId);
+        if (!blk) return;
+        blk.level = level;
+        blk._customOpen = false;
+        blk._selectionMode = 'none';
+        blk._customSelected = false;
+        syncTopLevelButtons();
+        renderBlocks();
+    }
+
+    function setSwimmerLevel(level) {
+        if (!['Principiante', 'Intermedio', 'Atleta'].includes(level)) return;
+        swimmerLevel = level;
+        blocks.forEach(blk => {
+            blk.level = level;
+            blk._customOpen = false;
+            blk._selectionMode = 'none';
+            blk._customSelected = false;
+        });
+        syncTopLevelButtons();
+        renderBlocks();
+    }
+
+    function getLapsPer100m() {
+        return 100 / poolLength; // 4 en 25m, 2 en 50m
+    }
+
+    function getPopularPacesForPool() {
+        const groups = [
+            {
+                level: "Principiante",
+                paces: [
+                    { label: "2:30/100m", sec100: 150, desc: "Muy suave / iniciación" },
+                    { label: "2:15/100m", sec100: 135, desc: "Cómodo y controlado" },
+                    { label: "2:00/100m", sec100: 120, desc: "Aeróbico fluido" }
+                ]
+            },
+            {
+                level: "Intermedio",
+                paces: [
+                    { label: "1:50/100m", sec100: 110, desc: "Rodaje constante" },
+                    { label: "1:40/100m", sec100: 100, desc: "Ritmo medio sostenido" },
+                    { label: "1:30/100m", sec100: 90, desc: "Ritmo exigente / umbral" }
+                ]
+            },
+            {
+                level: "Atleta",
+                paces: [
+                    { label: "1:25/100m", sec100: 85, desc: "Fondo competitivo" },
+                    { label: "1:18/100m", sec100: 78, desc: "Ritmo alto de serie" },
+                    { label: "1:10/100m", sec100: 70, desc: "Velocidad / competición" }
+                ]
+            }
+        ];
+        const laps100 = getLapsPer100m();
+        return groups.map(g => ({
+            level: g.level,
+            paces: g.paces.map(p => ({
+                ...p,
+                perLap: +(p.sec100 / laps100).toFixed(2)
+            }))
+        }));
+    }
+
+    function setBlockDuration(blockId, mins) {
+        const blk = blocks.find(b => b.id === blockId);
+        if (!blk) return;
+        const val = parseFloat(mins);
+        if (isNaN(val) || val <= 0) return;
+        blk.durationMin = val;
+        renderBlocks();
+    }
+
+    let _suppressCustomToggle = false;
+    function toggleCustomBeepActive(blockId, isOpen) {
+        if (_suppressCustomToggle) return;
+        const blk = blocks.find(b => b.id === blockId);
+        if (!blk) return;
+        const detEl = document.getElementById(`customBeepDetails-${blockId}`);
+        const actualOpen = (typeof isOpen === 'boolean') ? isOpen : (detEl ? detEl.open : false);
+        if (blk._customOpen === actualOpen) return;
+        blk._customOpen = actualOpen;
+        if (actualOpen) {
+            blk._selectionMode = 'custom';
+            blk._customSelected = true;
+        } else {
+            blk._customOpen = false;
+            if (blk._selectionMode === 'custom') blk._selectionMode = 'none';
+            blk._customSelected = false;
+        }
+        renderBlocks();
+    }
+
+    function markCustomPaceSelected(blockId) {
+        const blk = blocks.find(b => b.id === blockId);
+        if (!blk) return;
+        blk._selectionMode = 'custom';
+        blk._customOpen = true;
+        blk._customSelected = true;
+        renderBlocks();
+    }
+
+    function inferLevelFromPerLap(perLap) {
+        const groups = getPopularPacesForPool();
+        for (const g of groups) {
+            if (g.paces.some(p => Math.abs(p.perLap - perLap) < 0.02)) {
+                return g.level;
+            }
+        }
+        return null;
+    }
+
+    function applyLevelPaceToBlock(blockId, perLap, isProgressive = false, explicitLevel = null) {
+        const blk = blocks.find(b => b.id === blockId);
+        if (!blk) return;
+        blk.type = 'swim';
+        blk.intervalSec = perLap;
+        blk.endIntervalSec = perLap;
+        recalculateBlockDurationFromDistance(blk);
+        const detectedLvl = explicitLevel || inferLevelFromPerLap(perLap);
+        if (detectedLvl) {
+            blk.level = detectedLvl;
+        }
+        blk._wasSynced = true;
+        blk._selectionMode = 'preset';
+        blk._customSelected = false;
+        blk._customOpen = false;
+        syncTopLevelButtons();
+        renderBlocks();
+    }
+
+    function buildLevelCardHtml(group, targetBlockId = null, isWarmup = false, activeBlockLevel = null) {
+        const targetBlk = targetBlockId !== null ? blocks.find(b => b.id === targetBlockId) : null;
+        const currentLvl = activeBlockLevel || swimmerLevel;
+        const mode = targetBlk ? (targetBlk._selectionMode || 'none') : 'none';
+        const btns = group.paces.map(item => {
+            const fn = targetBlockId !== null
+                ? `applyLevelPaceToBlock(${targetBlockId}, ${item.perLap}, ${isWarmup ? 'true' : 'false'}, '${group.level}')`
+                : `applyPresetToLastBlock(${item.perLap})`;
+            const isSelected = targetBlk
+                && mode === 'preset'
+                && targetBlk.type === 'swim'
+                && Math.abs(targetBlk.intervalSec - item.perLap) < 0.02
+                && Math.abs(targetBlk.endIntervalSec - item.perLap) < 0.02;
+            const activeClass = isSelected ? ' active' : '';
+            return `<button type="button" class="pace-lvl-btn${activeClass}" onclick="${fn}">
+                <span class="pace-lvl-val">${item.label} <small>(${item.perLap}s)</small></span>
+                <span class="pace-lvl-desc">${item.desc}</span>
+            </button>`;
+        }).join("\n                ");
+        const levelSelectorPills = ['Principiante', 'Intermedio', 'Atleta'].map(lvl => {
+            const activePillClass = (lvl === currentLvl && mode !== 'custom') ? ' active' : '';
+            const clickHandler = targetBlockId !== null
+                ? `setBlockLevel(${targetBlockId}, '${lvl}')`
+                : `setSwimmerLevel('${lvl}')`;
+            return `<button type="button" class="level-btn${activePillClass}" style="padding:4px 9px; font-size:0.72rem;" onclick="${clickHandler}">${lvl}</button>`;
+        }).join('');
+
+        return `<div class="pace-group-card">
+            <div class="pace-group-header">
+                <div class="level-toggle-group" role="group" aria-label="Nivel de este bloque">
+                    ${levelSelectorPills}
+                </div>
+            </div>
+            ${btns}
+        </div>`;
+    }
+
+    function renderQuickPresetsHtml(targetBlockId = null, isWarmup = false) {
+        const targetBlk = targetBlockId !== null ? blocks.find(b => b.id === targetBlockId) : null;
+        const blockLvl = (targetBlk && targetBlk.level) ? targetBlk.level : swimmerLevel;
+        const groups = getPopularPacesForPool();
+        const selectedGroup = groups.find(g => g.level === blockLvl) || groups[0];
+
+        return `<div class="pace-levels-row">
+            ${buildLevelCardHtml(selectedGroup, targetBlockId, isWarmup, blockLvl)}
+        </div>`;
+    }
+
+    function setPoolLength(meters) {
+        if (meters !== 25 && meters !== 50 || poolLength === meters) return;
+        const prevLaps100 = getLapsPer100m();
+        poolLength = meters;
+        const newLaps100 = getLapsPer100m();
+        const ratio = prevLaps100 / newLaps100;
+
+        blocks.forEach(blk => {
+            if (blk.type === 'swim') {
+                blk.intervalSec = +(blk.intervalSec * ratio).toFixed(2);
+                blk.endIntervalSec = +(blk.endIntervalSec * ratio).toFixed(2);
+                recalculateBlockDurationFromDistance(blk);
+            }
+        });
+
+        const _tPool = document.getElementById('titlePoolLabel'); if (_tPool) _tPool.textContent = `${poolLength}m`;
+        document.getElementById('poolBtn25').classList.toggle('active', poolLength === 25);
+        document.getElementById('poolBtn50').classList.toggle('active', poolLength === 50);
+        renderBlocks();
+    }
+
+    let blockCounter = 0;
+    let blocks = [
+        {
+            id: ++blockCounter,
+            type: 'swim',
+            name: 'Calentamiento progresivo',
+            mode: 'time',
+            durationMin: 10,
+            distanceMeters: 400,
+            intervalSec: 37.5,
+            endIntervalSec: 37.5,
+            level: 'Principiante',
+            _wasSynced: true,
+            _selectionMode: 'none'
+        },
+        {
+            id: ++blockCounter,
+            type: 'swim',
+            name: 'Serie principal',
+            mode: 'time',
+            durationMin: 20,
+            distanceMeters: 800,
+            intervalSec: 30,
+            endIntervalSec: 30,
+            level: 'Principiante',
+            _wasSynced: true,
+            _selectionMode: 'none'
+        }
+    ];
+
+    let trackCounter = 0;
+    let playlistTracks = []; // { id, file, name, startOffsetSec }
+
+    function setProgress(pct, label) {
+        const wrap = document.getElementById('progressWrap');
+        wrap.style.display = 'block';
+        const clamped = Math.max(0, Math.min(100, Math.round(pct)));
+        document.getElementById('progressBarFill').style.width = clamped + '%';
+        document.getElementById('progressPercent').textContent = clamped + '%';
+        if (label) document.getElementById('progressText').textContent = label;
+    }
+
+    function hideProgress() {
+        document.getElementById('progressWrap').style.display = 'none';
+    }
+
+    // --- PLANTILLAS GUARDADAS EN LOCALSTORAGE + JSON ---
+    function getDefaultTemplates() {
+        return [
+            {
+                name: "Rodaje 30 min (1:40/100m)",
+                blocks: [
+                    { type: 'swim', name: 'Ritmo continuo', durationMin: 30, intervalSec: 25, endIntervalSec: 25 }
+                ]
+            },
+            {
+                name: "Calentamiento + Serie + Pausa",
+                blocks: [
+                    { type: 'swim', name: 'Calentamiento', durationMin: 10, intervalSec: 27.5, endIntervalSec: 25 },
+                    { type: 'rest', name: 'Descanso en pared', durationMin: 1, intervalSec: 25, endIntervalSec: 25 },
+                    { type: 'swim', name: 'Serie ritmo', durationMin: 20, intervalSec: 23.5, endIntervalSec: 22.5 }
+                ]
+            }
+        ];
+    }
+
+    function loadTemplates() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) {
+                const defaults = getDefaultTemplates();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+                return defaults;
+            }
+            return JSON.parse(raw);
+        } catch (e) {
+            return getDefaultTemplates();
+        }
+    }
+
+    let selectedSessionIndex = 0;
+    const sessionAudioMap = {}; // sessionName -> { wavUrl, wavFilename, infoText }
+
+    function summarizeSessionBlocks(sessionBlocks) {
+        if (!Array.isArray(sessionBlocks) || sessionBlocks.length === 0) return "0 min · 0 m";
+        let minSum = 0;
+        let estMeters = 0;
+        const laps100 = getLapsPer100m();
+        sessionBlocks.forEach(b => {
+            const blkSec = computeBlockDurationSec(b);
+            minSum += blkSec / 60;
+            if (b.type === 'swim') {
+                if (b.mode === 'distance') {
+                    estMeters += Number(b.distanceMeters) || 0;
+                } else {
+                    const avgInt = ((Number(b.intervalSec) || 25) + (Number(b.endIntervalSec) || Number(b.intervalSec) || 25)) / 2;
+                    if (avgInt > 0) {
+                        const laps = Math.floor(blkSec / avgInt);
+                        estMeters += laps * poolLength;
+                    }
+                }
+            }
+        });
+        const minLabel = Number.isInteger(minSum) ? minSum : minSum.toFixed(1);
+        return `${minLabel} min · ~${estMeters.toLocaleString('es-ES')} m (${sessionBlocks.length} bloque${sessionBlocks.length === 1 ? '' : 's'})`;
+    }
+
+    function renderTemplates() {
+        const list = loadTemplates();
+        if (selectedSessionIndex >= list.length) {
+            selectedSessionIndex = Math.max(0, list.length - 1);
+        }
+
+        const selectEl = document.getElementById('savedSessionSelect');
+        if (selectEl) {
+            selectEl.innerHTML = '';
+            if (list.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'No hay sesiones guardadas todavía';
+                selectEl.appendChild(opt);
+            } else {
+                list.forEach((tpl, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = String(idx);
+                    opt.textContent = `${tpl.name} (${summarizeSessionBlocks(tpl.blocks)})`;
+                    if (idx === selectedSessionIndex) opt.selected = true;
+                    selectEl.appendChild(opt);
+                });
+            }
+        }
+
+        const audioListContainer = document.getElementById('savedSessionsAudioList');
+        if (audioListContainer) {
+            audioListContainer.innerHTML = '';
+            if (list.length === 0) {
+                audioListContainer.innerHTML = `<div class="info-small">Aún no tienes sesiones guardadas. Usa el botón <strong>+ Guardar sesión</strong> para añadir una.</div>`;
+                return;
+            }
+
+            list.forEach((tpl, idx) => {
+                const card = document.createElement('div');
+                card.className = 'saved-session-card' + (idx === selectedSessionIndex ? ' active-session' : '');
+                const audioEntry = sessionAudioMap[tpl.name];
+                const audioHtml = audioEntry
+                    ? `<audio class="saved-session-audio" controls src="${audioEntry.wavUrl}"></audio>
+                       <div class="info-small" style="margin-top:0;">${audioEntry.infoText} · <a href="${audioEntry.wavUrl}" download="${audioEntry.wavFilename}" style="color:var(--primary-dark); font-weight:700;">Descargar .WAV</a></div>`
+                    : `<div class="info-small" style="margin-top:0;">Sin audio generado todavía para esta sesión. Selecciónala arriba y pulsa <strong>Generar Audio Descargable</strong>.</div>`;
+
+                card.innerHTML = `
+                    <div class="saved-session-header">
+                        <div>
+                            <div class="saved-session-name">📋 ${tpl.name.replace(/</g, '&lt;')}</div>
+                            <div class="saved-session-meta">${summarizeSessionBlocks(tpl.blocks)}</div>
+                        </div>
+                        <div class="saved-session-actions">
+                            <button type="button" class="mini-btn primary" onclick="selectSavedSessionByIndex(${idx})">Cargar sesión</button>
+                            <button type="button" class="mini-btn" onclick="deleteTemplate(${idx}, event)" style="color:var(--danger); border-color:#fecaca;">✕ Eliminar</button>
+                        </div>
+                    </div>
+                    ${audioHtml}
+                `;
+                audioListContainer.appendChild(card);
+            });
+        }
+    }
+
+    function selectSavedSessionByIndex(idxVal) {
+        const idx = parseInt(idxVal, 10);
+        if (isNaN(idx)) return;
+        selectedSessionIndex = idx;
+        applyTemplate(idx);
+    }
+
+    function saveCurrentTemplate() {
+        const defaultName = `Sesión ${Math.round(buildTimeline().totalDurationSec / 60)} min`;
+        const name = prompt("Nombre para guardar esta sesión:", defaultName);
+        if (!name || !name.trim()) return;
+        const cleanName = name.trim();
+        const list = loadTemplates();
+        const existingIdx = list.findIndex(t => t.name === cleanName);
+        const sessionObj = {
+            name: cleanName,
+            blocks: blocks.map(b => ({
+                type: b.type,
+                name: b.name,
+                mode: b.mode || 'time',
+                durationMin: b.durationMin,
+                distanceMeters: b.distanceMeters || 200,
+                intervalSec: b.intervalSec,
+                endIntervalSec: b.endIntervalSec
+            }))
+        };
+        if (existingIdx >= 0) {
+            list[existingIdx] = sessionObj;
+            selectedSessionIndex = existingIdx;
+        } else {
+            list.push(sessionObj);
+            selectedSessionIndex = list.length - 1;
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        renderTemplates();
+    }
+
+    function applyTemplate(idx) {
+        const list = loadTemplates();
+        const tpl = list[idx];
+        if (!tpl || !Array.isArray(tpl.blocks)) return;
+        selectedSessionIndex = idx;
+        blocks = tpl.blocks.map(b => {
+            const obj = {
+                id: ++blockCounter,
+                type: b.type || 'swim',
+                name: b.name || 'Bloque',
+                mode: b.mode || 'time',
+                durationMin: b.durationMin || 10,
+                distanceMeters: b.distanceMeters || 200,
+                intervalSec: b.intervalSec || 25,
+                endIntervalSec: b.endIntervalSec || b.intervalSec || 25,
+                level: b.level || swimmerLevel,
+                _wasSynced: (b.endIntervalSec === b.intervalSec),
+                _selectionMode: (b.endIntervalSec !== b.intervalSec) ? 'custom' : 'none'
+            };
+            recalculateBlockDurationFromDistance(obj);
+            return obj;
+        });
+        syncGlobalModeButtons();
+        renderBlocks();
+        renderTemplates();
+    }
+
+    function deleteTemplate(idx, ev) {
+        if (ev) ev.stopPropagation();
+        const list = loadTemplates();
+        const removed = list[idx];
+        if (removed && sessionAudioMap[removed.name]) {
+            delete sessionAudioMap[removed.name];
+        }
+        list.splice(idx, 1);
+        if (selectedSessionIndex >= list.length) {
+            selectedSessionIndex = Math.max(0, list.length - 1);
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        renderTemplates();
+    }
+
+    function exportTemplateJSON() {
+        const payload = {
+            app: "TempoTrainerUltra25m",
+            exportedAt: new Date().toISOString(),
+            blocks: blocks.map(b => ({
+                type: b.type,
+                name: b.name,
+                mode: b.mode || 'time',
+                durationMin: b.durationMin,
+                distanceMeters: b.distanceMeters || 200,
+                intervalSec: b.intervalSec,
+                endIntervalSec: b.endIntervalSec
+            }))
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'plantilla_natacion_25m.json';
+        a.click();
+    }
+
+    function importTemplateJSON(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const parsed = JSON.parse(reader.result);
+                if (!Array.isArray(parsed.blocks) || parsed.blocks.length === 0) {
+                    alert("Archivo JSON sin bloques válidos.");
+                    return;
+                }
+                blocks = parsed.blocks.map(b => {
+                    const obj = {
+                        id: ++blockCounter,
+                        type: b.type === 'rest' ? 'rest' : 'swim',
+                        name: String(b.name || 'Bloque'),
+                        mode: b.mode === 'distance' ? 'distance' : 'time',
+                        durationMin: Number(b.durationMin) || 5,
+                        distanceMeters: Number(b.distanceMeters) || 200,
+                        intervalSec: Number(b.intervalSec) || 25,
+                        endIntervalSec: Number(b.endIntervalSec) || Number(b.intervalSec) || 25,
+                        level: b.level || swimmerLevel,
+                        _wasSynced: Number(b.endIntervalSec) === Number(b.intervalSec),
+                        _selectionMode: (Number(b.endIntervalSec) !== Number(b.intervalSec)) ? 'custom' : 'none'
+                    };
+                    recalculateBlockDurationFromDistance(obj);
+                    return obj;
+                });
+                syncGlobalModeButtons();
+                renderBlocks();
+            } catch (err) {
+                alert("No se pudo leer el JSON.");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // --- RITMOS Y BLOQUES ---
+    function formatPaceMMSS(intervalSec) {
+        const secPer100 = intervalSec * getLapsPer100m();
+        const mins = Math.floor(secPer100 / 60);
+        const secs = Math.round(secPer100 % 60);
+        if (secs === 60) return `${mins + 1}:00`;
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function formatPaceSpoken(intervalSec) {
+        const secPer100 = Math.round(intervalSec * getLapsPer100m());
+        const mins = Math.floor(secPer100 / 60);
+        const secs = secPer100 % 60;
+        const secStr = secs < 10 ? `0${secs}` : `${secs}`;
+        return `${mins}${secStr}`;
+    }
+
+    function addBlock(type = 'swim') {
+        const lastSwim = [...blocks].reverse().find(b => b.type === 'swim');
+        const defaultInt = lastSwim ? lastSwim.endIntervalSec : 25;
+        const newBlk = {
+            id: ++blockCounter,
+            type: type,
+            name: type === 'swim' ? `Bloque ${blocks.length + 1}` : 'Descanso en pared',
+            mode: type === 'swim' ? defaultBlockMode : 'time',
+            durationMin: type === 'swim' ? 10 : 1,
+            distanceMeters: 200,
+            intervalSec: defaultInt,
+            endIntervalSec: defaultInt,
+            level: (lastSwim && lastSwim.level) ? lastSwim.level : swimmerLevel,
+            _wasSynced: true,
+            _selectionMode: 'none'
+        };
+        recalculateBlockDurationFromDistance(newBlk);
+        blocks.push(newBlk);
+        renderBlocks();
+    }
+
+    function removeBlock(id) {
+        if (blocks.length <= 1) return;
+        blocks = blocks.filter(b => b.id !== id);
+        renderBlocks();
+    }
+
+    function parsePaceToSecondsPer100(str) {
+        if (!str) return null;
+        const clean = String(str).trim();
+        if (clean.includes(':')) {
+            const parts = clean.split(':');
+            if (parts.length !== 2) return null;
+            const mins = parseInt(parts[0], 10);
+            const secs = parseFloat(parts[1]);
+            if (isNaN(mins) || isNaN(secs) || mins < 0 || secs < 0) return null;
+            const total100 = mins * 60 + secs;
+            return total100 > 0 ? total100 : null;
+        }
+        const num = parseFloat(clean);
+        return (!isNaN(num) && num > 0) ? num : null;
+    }
+
+    function updateBlockPace100(id, field, value) {
+        const blk = blocks.find(b => b.id === id);
+        if (!blk) return;
+        blk._selectionMode = 'custom';
+        blk._customOpen = true;
+        blk._customSelected = true;
+        const total100 = parsePaceToSecondsPer100(value);
+        if (!total100) {
+            return;
+        }
+        const perLap = +(total100 / getLapsPer100m()).toFixed(2);
+        blk[field] = perLap;
+        blk._wasSynced = false;
+        recalculateBlockDurationFromDistance(blk);
+        renderBlocks(true);
+    }
+
+    function updateBlockField(id, field, value) {
+        const blk = blocks.find(b => b.id === id);
+        if (!blk) return;
+        if (field === 'name') {
+            blk.name = value;
+        } else {
+            const num = parseFloat(value);
+            if (!isNaN(num) && num > 0) {
+                blk[field] = num;
+                if (field === 'intervalSec') {
+                    blk._wasSynced = false;
+                }
+                if (field === 'endIntervalSec') {
+                    blk._wasSynced = false;
+                }
+                if (field === 'intervalSec' || field === 'endIntervalSec') {
+                    recalculateBlockDurationFromDistance(blk);
+                }
+            }
+        }
+        renderBlocks(true);
+    }
+
+    function applyPresetToBlock(blockId, sec) {
+        const target = blocks.find(b => b.id === blockId);
+        if (!target) return;
+        target.type = 'swim';
+        target.intervalSec = sec;
+        target.endIntervalSec = sec;
+        target._wasSynced = true;
+        recalculateBlockDurationFromDistance(target);
+        renderBlocks();
+    }
+
+    function applyPresetToLastBlock(sec) {
+        const target = [...blocks].reverse().find(b => b.type === 'swim') || blocks[blocks.length - 1];
+        if (!target) return;
+        applyPresetToBlock(target.id, sec);
+    }
+
+    function buildTimeline() {
+        let currentSec = 0;
+        let totalMeters = 0;
+        let totalLaps = 0;
+        const events = [];
+
+        blocks.forEach((blk, idx) => {
+            const isDistanceMode = (blk.type === 'swim' && blk.mode === 'distance');
+            const targetLaps = isDistanceMode ? Math.max(1, Math.round((Number(blk.distanceMeters) || 200) / poolLength)) : null;
+            const blkDurationSec = computeBlockDurationSec(blk);
+            const blkStartSec = currentSec;
+            const blkEndSec = blkStartSec + blkDurationSec;
+
+            events.push({
+                type: 'block_start',
+                time: blkStartSec,
+                endTime: blkEndSec,
+                blockIndex: idx,
+                block: blk,
+                metersSoFar: totalMeters
+            });
+
+            if (blk.type === 'swim') {
+                let tInBlock = 0;
+                let lapsInBlock = 0;
+                while (true) {
+                    if (isDistanceMode && lapsInBlock >= targetLaps) break;
+                    const progress = isDistanceMode
+                        ? (targetLaps > 1 ? Math.min(1, lapsInBlock / (targetLaps - 1)) : 0)
+                        : (blkDurationSec > 0 ? Math.min(1, tInBlock / blkDurationSec) : 0);
+                    const currentInterval = blk.intervalSec + (blk.endIntervalSec - blk.intervalSec) * progress;
+                    const nextLapTimeInBlock = tInBlock + currentInterval;
+
+                    if (!isDistanceMode && nextLapTimeInBlock > blkDurationSec + 0.01) break;
+
+                    tInBlock = nextLapTimeInBlock;
+                    lapsInBlock++;
+                    totalLaps++;
+                    totalMeters += poolLength;
+
+                    events.push({
+                        type: 'lap',
+                        time: blkStartSec + tInBlock,
+                        lapNumber: totalLaps,
+                        meters: totalMeters,
+                        currentInterval: currentInterval,
+                        blockStartInterval: blk.intervalSec,
+                        isProgressiveBlock: Math.abs(blk.endIntervalSec - blk.intervalSec) >= 0.25,
+                        is100m: (totalLaps % getLapsPer100m() === 0)
+                    });
+                }
+                if (isDistanceMode) {
+                    events[events.length - 1 - lapsInBlock].endTime = blkStartSec + tInBlock;
+                    currentSec = blkStartSec + tInBlock;
+                } else {
+                    currentSec = blkEndSec;
+                }
+            } else {
+                currentSec = blkEndSec;
+            }
+        });
+
+        return {
+            totalDurationSec: currentSec,
+            totalMeters,
+            totalLaps,
+            events
+        };
+    }
+
+    function renderBlocks(skipInputRebuild = false) {
+        const container = document.getElementById('blocksContainer');
+        if (!skipInputRebuild) {
+            container.innerHTML = '';
+            blocks.forEach((blk, index) => {
+                const card = document.createElement('div');
+                card.className = 'block-card';
+                const isSwim = blk.type === 'swim';
+                card.innerHTML = `
+                    <div class="block-header">
+                        <div class="block-badge">
+                            <span>${isSwim ? '🏊‍♂️' : '⏸️'} #${index + 1}</span>
+                            <input type="text" class="block-name-input" value="${blk.name.replace(/"/g, '&quot;')}" 
+                                   oninput="updateBlockField(${blk.id}, 'name', this.value)">
+                        </div>
+                        ${blocks.length > 1 ? `<button type="button" class="btn-remove" onclick="removeBlock(${blk.id})">✕ Quitar</button>` : ''}
+                    </div>
+                    ${isSwim ? `
+                    <div class="warmup-box">
+                        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+                            <label style="margin-bottom:0;">${(blk.mode || 'time') === 'distance' ? '📏 Distancia para este bloque (m)' : '⏱️ Tiempo para este bloque (min)'}</label>
+                            <div class="mode-toggle-group" role="group" aria-label="Modo de este bloque">
+                                <button type="button" class="mode-btn ${(blk.mode || 'time') === 'time' ? 'active' : ''}" style="padding:4px 10px; font-size:0.75rem;" onclick="setBlockMode(${blk.id}, 'time')">⏱️ Por tiempo</button>
+                                <button type="button" class="mode-btn ${(blk.mode || 'time') === 'distance' ? 'active' : ''}" style="padding:4px 10px; font-size:0.75rem;" onclick="setBlockMode(${blk.id}, 'distance')">📏 Por distancia</button>
+                            </div>
+                        </div>
+                        ${(blk.mode || 'time') === 'distance' ? `
+                        <div class="warmup-time-row">
+                            <select style="width: 160px;" onchange="updateBlockDistance(${blk.id}, this.value)">
+                                ${buildDistanceOptionsHtml(blk.distanceMeters || 200)}
+                            </select>
+                            <span class="calculated-duration-badge" id="block-calc-dur-${blk.id}">⏱️ Duración exacta: <strong>${formatMinutesAndSeconds(computeBlockDurationSec(blk))}</strong></span>
+                        </div>
+                        ` : `
+                        <div class="warmup-time-row">
+                            <input type="number" style="width: 140px;" value="${blk.durationMin}" min="0.5" max="180" step="0.5"
+                                   oninput="updateBlockField(${blk.id}, 'durationMin', this.value)">
+                        </div>
+                        `}
+                    </div>
+
+                    <div class="warmup-box">
+                        <label>🏊‍♂️ Ritmos más usados por 100m (${poolLength}m) — Nivel de este bloque: ${blk.level || swimmerLevel}</label>
+                        ${renderQuickPresetsHtml(blk.id, false)}
+                    </div>
+
+                    <details class="custom-beep-accordion${blk._selectionMode === 'custom' ? ' custom-active' : ''}" id="customBeepDetails-${blk.id}" ${blk._customOpen ? 'open' : ''} ontoggle="toggleCustomBeepActive(${blk.id}, this.open)">
+                        <summary>⏱️ Ajustar ritmo por 100m a escoger</summary>
+                        <div class="custom-beep-box">
+                            <div class="grid-2">
+                                <div>
+                                    <label>Ritmo inicial cada 100m (mm:ss)</label>
+                                    <input type="text" id="pace100Start-${blk.id}" value="${formatPaceMMSS(blk.intervalSec)}" placeholder="ej. 1:40"
+                                           oninput="updateBlockPace100(${blk.id}, 'intervalSec', this.value)">
+                                </div>
+                                <div>
+                                    <label>Ritmo final cada 100m (mm:ss)</label>
+                                    <input type="text" id="pace100End-${blk.id}" value="${formatPaceMMSS(blk.endIntervalSec)}" placeholder="ej. 1:35"
+                                           oninput="updateBlockPace100(${blk.id}, 'endIntervalSec', this.value)">
+                                </div>
+                            </div>
+                            <div class="grid-2" style="margin-top: 10px;">
+                                <div>
+                                    <label>Pitido inicial (seg)</label>
+                                    <input type="number" id="beepStart-${blk.id}" value="${blk.intervalSec}" min="5" max="300" step="0.25"
+                                           oninput="updateBlockField(${blk.id}, 'intervalSec', this.value)">
+                                </div>
+                                <div>
+                                    <label>Pitido final / progresivo (seg)</label>
+                                    <input type="number" id="beepEnd-${blk.id}" value="${blk.endIntervalSec}" min="5" max="300" step="0.25"
+                                           oninput="updateBlockField(${blk.id}, 'endIntervalSec', this.value)">
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                    ` : `
+                    <div class="grid-2">
+                        <div>
+                            <label>Duración de la pausa (min)</label>
+                            <input type="number" value="${blk.durationMin}" min="0.25" max="60" step="0.25"
+                                   oninput="updateBlockField(${blk.id}, 'durationMin', this.value)">
+                        </div>
+                        <div style="display:flex; align-items:center; font-size:0.84rem; color:var(--muted); padding-top:18px;">
+                            Pausa en pared con aviso de reanudación.
+                        </div>
+                    </div>
+                    `}
+                    <div class="block-meta" id="block-meta-${blk.id}"></div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        const timeline = buildTimeline();
+        blocks.forEach((blk, idx) => {
+            const pStartEl = document.getElementById(`pace100Start-${blk.id}`);
+            if (pStartEl && document.activeElement !== pStartEl) {
+                const formattedStart = formatPaceMMSS(blk.intervalSec);
+                if (parsePaceToSecondsPer100(pStartEl.value) !== Math.round(blk.intervalSec * getLapsPer100m())) {
+                    pStartEl.value = formattedStart;
+                }
+            }
+            const pEndEl = document.getElementById(`pace100End-${blk.id}`);
+            if (pEndEl && document.activeElement !== pEndEl) {
+                const formattedEnd = formatPaceMMSS(blk.endIntervalSec);
+                if (parsePaceToSecondsPer100(pEndEl.value) !== Math.round(blk.endIntervalSec * getLapsPer100m())) {
+                    pEndEl.value = formattedEnd;
+                }
+            }
+            const bStartEl = document.getElementById(`beepStart-${blk.id}`);
+            if (bStartEl && document.activeElement !== bStartEl) {
+                bStartEl.value = blk.intervalSec;
+            }
+            const bEndEl = document.getElementById(`beepEnd-${blk.id}`);
+            if (bEndEl && document.activeElement !== bEndEl) {
+                bEndEl.value = blk.endIntervalSec;
+            }
+            const detEl = document.getElementById(`customBeepDetails-${blk.id}`);
+            if (detEl) {
+                const shouldBeOpen = !!blk._customOpen;
+                if (detEl.open !== shouldBeOpen) {
+                    _suppressCustomToggle = true;
+                    detEl.open = shouldBeOpen;
+                    setTimeout(() => { _suppressCustomToggle = false; }, 0);
+                }
+                const isCustom = blk._selectionMode === 'custom' && shouldBeOpen;
+                detEl.classList.toggle('custom-active', isCustom);
+            }
+            const calcDurEl = document.getElementById(`block-calc-dur-${blk.id}`);
+            if (calcDurEl && blk.type === 'swim' && blk.mode === 'distance') {
+                calcDurEl.innerHTML = `⏱️ Duración exacta: <strong>${formatMinutesAndSeconds(computeBlockDurationSec(blk))}</strong>`;
+            }
+            const metaEl = document.getElementById(`block-meta-${blk.id}`);
+            if (!metaEl) return;
+            if (blk.type === 'swim') {
+                const startPace = formatPaceMMSS(blk.intervalSec);
+                const endPace = formatPaceMMSS(blk.endIntervalSec);
+                const paceText = (blk.intervalSec === blk.endIntervalSec)
+                    ? `Ritmo constante: <strong>${startPace} / 100m</strong>`
+                    : `Progresivo: <strong>${startPace} → ${endPace} / 100m</strong>`;
+                const startSec = blocks.slice(0, idx).reduce((a, b) => a + computeBlockDurationSec(b), 0);
+                const blkDurSec = computeBlockDurationSec(blk);
+                const endSec = startSec + blkDurSec;
+                const blkLaps = timeline.events.filter(e => e.type === 'lap' && e.time > startSec && e.time <= endSec + 0.01).length;
+                const rightMeta = (blk.mode === 'distance')
+                    ? `Distancia exacta: <strong>${blkLaps * poolLength} m</strong> (${blkLaps} largos · ${formatMinutesAndSeconds(blkDurSec)})`
+                    : `Estimado bloque: <strong>${blkLaps * poolLength} m</strong> (${blkLaps} largos)`;
+                metaEl.innerHTML = `<span>${paceText}</span><span>${rightMeta}</span>`;
+            } else {
+                metaEl.innerHTML = `<span>Descanso / recuperación</span><span><strong>${blk.durationMin} min</strong></span>`;
+            }
+        });
+
+        const totalMin = timeline.totalDurationSec / 60;
+        const hasExactSeconds = Math.round(timeline.totalDurationSec) % 60 !== 0;
+        const totalDurationLabel = hasExactSeconds
+            ? formatMinutesAndSeconds(timeline.totalDurationSec)
+            : `${Math.round(totalMin)} minutos`;
+        const totalMinFormatted = Number.isInteger(totalMin) ? totalMin : totalMin.toFixed(1);
+        const swimBlocks = blocks.filter(b => b.type === 'swim');
+        const paceNote = (swimBlocks.length === 1 && swimBlocks[0].intervalSec === swimBlocks[0].endIntervalSec)
+            ? ` · Ritmo constante: <strong>${formatPaceMMSS(swimBlocks[0].intervalSec)}/100m</strong> (${swimBlocks[0].intervalSec}s/largo × ${totalMinFormatted} min)`
+            : "";
+        document.getElementById('summaryBox').innerHTML = `
+            ⏱️ Duración total de la sesión: <strong>${totalDurationLabel}</strong>${paceNote}<br>
+            🏊‍♂️ Distancia total estimada: <strong>${timeline.totalMeters.toLocaleString('es-ES')} metros</strong> (${timeline.totalLaps} largos de ${poolLength}m)
+        `;
+    }
+
+    // --- GESTIÓN DE LISTA DE CANCIONES ---
+    function toggleMusicOptions() {
+        const checked = document.getElementById('enableMusic').checked;
+        document.getElementById('musicOptionsBlock').style.display = checked ? 'block' : 'none';
+    }
+
+    function appendMusicFiles(fileList) {
+        const files = Array.from(fileList || []);
+        files.forEach(file => {
+            playlistTracks.push({
+                id: ++trackCounter,
+                file: file,
+                name: file.name,
+                startOffsetSec: 0
+            });
+        });
+        document.getElementById('musicFiles').value = '';
+        renderTrackList();
+    }
+
+    function moveTrack(index, delta) {
+        const target = index + delta;
+        if (target < 0 || target >= playlistTracks.length) return;
+        const temp = playlistTracks[index];
+        playlistTracks[index] = playlistTracks[target];
+        playlistTracks[target] = temp;
+        renderTrackList();
+    }
+
+    function removeTrack(index) {
+        playlistTracks.splice(index, 1);
+        renderTrackList();
+    }
+
+    function updateTrackOffset(id, val) {
+        const tr = playlistTracks.find(t => t.id === id);
+        if (!tr) return;
+        const sec = parseFloat(val);
+        tr.startOffsetSec = (!isNaN(sec) && sec >= 0) ? sec : 0;
+    }
+
+    function renderTrackList() {
+        const container = document.getElementById('trackListContainer');
+        if (!playlistTracks.length) {
+            container.innerHTML = `<div class="info-small">Aún no hay canciones en la lista. Selecciona uno o varios archivos arriba.</div>`;
+            return;
+        }
+        container.innerHTML = '';
+        playlistTracks.forEach((tr, idx) => {
+            const div = document.createElement('div');
+            div.className = 'track-item';
+            div.innerHTML = `
+                <div class="track-title">${idx + 1}. ${tr.name.replace(/</g, '&lt;')}</div>
+                <div class="track-controls">
+                    <label class="track-trim" title="Segundo en el que empieza la canción">
+                        Inicio (s):
+                        <input type="number" min="0" max="600" step="1" value="${tr.startOffsetSec}"
+                               oninput="updateTrackOffset(${tr.id}, this.value)">
+                    </label>
+                    <button type="button" class="icon-btn" onclick="moveTrack(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="Subir">↑</button>
+                    <button type="button" class="icon-btn" onclick="moveTrack(${idx}, 1)" ${idx === playlistTracks.length - 1 ? 'disabled' : ''} title="Bajar">↓</button>
+                    <button type="button" class="icon-btn del" onclick="removeTrack(${idx})" title="Quitar canción">✕</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // --- SÍNTESIS DE AUDIO, TONOS, DUCKING Y LIMITADOR ---
+    function toggleVoiceOptions() {
+        const isChecked = document.getElementById('doubleBeepEvery4').checked;
+        document.getElementById('voiceOptionsBlock').style.display = isChecked ? 'block' : 'none';
+    }
+
+    function addTone(samples, sampleRate, startTimeSec, durationSec, freq, amplitude = 0.75) {
+        const startSample = Math.floor(startTimeSec * sampleRate);
+        const numSamples = Math.floor(durationSec * sampleRate);
+        const fadeSamples = Math.floor(0.018 * sampleRate);
+
+        for (let i = 0; i < numSamples; i++) {
+            const idx = startSample + i;
+            if (idx >= samples.length) break;
+
+            let env = 1.0;
+            if (i < fadeSamples) env = i / fadeSamples;
+            else if (i > numSamples - fadeSamples) env = (numSamples - i) / fadeSamples;
+
+            const t = i / sampleRate;
+            const val = Math.sin(2 * Math.PI * freq * t) * amplitude * env;
+            samples[idx] = Math.max(-1, Math.min(1, samples[idx] + val));
+        }
+    }
+
+    const speechCache = {};
+    const localClipCache = {};
+
+    function getAssetsVoiceBasePath() {
+        const el = document.getElementById('localVoiceBasePath');
+        const val = el && el.value ? el.value.trim() : './assets/voices/es';
+        return val.replace(/\/+$/, '');
+    }
+
+    let nativeVoicesList = [];
+    let preferNativeVoice = true;
+    let nativeVoiceReady = false;
+
+    function refreshNativeVoices() {
+        if (!('speechSynthesis' in window)) return [];
+        const all = window.speechSynthesis.getVoices() || [];
+        nativeVoicesList = all.filter(v => /es/i.test(v.lang));
+        if (nativeVoicesList.length === 0) nativeVoicesList = all;
+        nativeVoiceReady = nativeVoicesList.length > 0;
+        return nativeVoicesList;
+    }
+
+    if ('speechSynthesis' in window) {
+        refreshNativeVoices();
+        window.speechSynthesis.onvoiceschanged = () => {
+            refreshNativeVoices();
+            updateVoiceStatusLabel();
+        };
+    }
+
+    function pickSpanishVoice() {
+        const list = refreshNativeVoices();
+        if (!list.length) return null;
+        return list.find(v => /^es[-_]ES/i.test(v.lang))
+            || list.find(v => /^es/i.test(v.lang))
+            || list[0];
+    }
+
+    function speakNativeNow(text, volume = 1.15, rate = 1.05) {
+        if (!('speechSynthesis' in window) || !text) return Promise.resolve(false);
+        return new Promise(resolve => {
+            try {
+                const utter = new SpeechSynthesisUtterance(text);
+                const voice = pickSpanishVoice();
+                if (voice) utter.voice = voice;
+                utter.lang = (voice && voice.lang) ? voice.lang : 'es-ES';
+                utter.volume = Math.max(0, Math.min(1, volume));
+                utter.rate = rate;
+                let settled = false;
+                const finish = (ok) => {
+                    if (!settled) {
+                        settled = true;
+                        resolve(ok);
+                    }
+                };
+                utter.onend = () => finish(true);
+                utter.onerror = () => finish(false);
+                window.speechSynthesis.speak(utter);
+                setTimeout(() => finish(true), Math.max(1200, text.length * 95));
+            } catch (e) {
+                resolve(false);
+            }
+        });
+    }
+
+    function clipKeyToSpanishPhrase(clipKey) {
+        const k = String(clipKey).toLowerCase().trim();
+        if (k === 'mitad_sesion') return 'Mitad de sesión';
+        if (k === 'bloque_nuevo') return 'Bloque nuevo';
+        if (k === 'pausa') return 'Pausa';
+        if (k === 'reiniciar_pausa') return 'Reiniciar pausa';
+        const cuentaMatch = k.match(/^cuenta_(\d+)$/);
+        if (cuentaMatch) return cuentaMatch[1];
+        const metrosMatch = k.match(/^(\d+)_metros$/);
+        if (metrosMatch) return `${metrosMatch[1]} metros`;
+        const mediaMatch = k.match(/^media_(\d)(\d{2})$/);
+        if (mediaMatch) {
+            const minNum = parseInt(mediaMatch[1], 10);
+            const secNum = parseInt(mediaMatch[2], 10);
+            return `Media ${minNum} ${secNum === 0 ? 'cero cero' : (secNum < 10 ? 'cero ' + secNum : secNum)}`;
+        }
+        return k.replace(/_/g, ' ');
+    }
+
+    let localClipsAvailableCount = 0;
+
+    function updateVoiceStatusLabel() {
+        const statusEl = document.getElementById('localVoiceStatus');
+        if (!statusEl) return;
+        const hasNative = ('speechSynthesis' in window) && refreshNativeVoices().length > 0;
+        if (localClipsAvailableCount > 0) {
+            statusEl.innerHTML = `Modo app sin servidor activo: <strong>Voz nativa del navegador</strong> + clips locales (<strong>${localClipsAvailableCount}</strong> en <code>./assets/voices/es</code>).`;
+        } else if (hasNative) {
+            const v = pickSpanishVoice();
+            const vName = v ? `${v.name} (${v.lang})` : 'Español nativo';
+            statusEl.innerHTML = `Modo app sin servidor activo: usando <strong>Voz nativa del dispositivo</strong> (<strong>${vName}</strong>). No requiere <code>localhost</code>.`;
+        } else {
+            statusEl.innerHTML = `Modo app sin servidor activo: voz nativa lista para activarse al reproducir o generar (sin necesidad de <code>localhost</code>).`;
+        }
+    }
+
+    async function preloadAssetsVoices() {
+        updateVoiceStatusLabel();
+        if (window.location.protocol === 'file:') {
+            localClipsAvailableCount = 0;
+            updateVoiceStatusLabel();
+            return;
+        }
+        const keys = ["mitad_sesion", "bloque_nuevo", "pausa", "reiniciar_pausa"];
+        for (let c = 10; c >= 0; c--) keys.push(`cuenta_${c}`);
+        let loaded = 0;
+        for (const k of keys) {
+            const clip = await loadSingleLocalVoiceClip(k, SAMPLE_RATE);
+            if (clip) loaded++;
+        }
+        localClipsAvailableCount = loaded;
+        updateVoiceStatusLabel();
+    }
+
+    async function decodeAudioBufferToMonoSamples(arrayBuf, sampleRate, playbackRate = 1.0) {
+        const tempCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, sampleRate * 15, sampleRate);
+        const decoded = await tempCtx.decodeAudioData(arrayBuf);
+        const targetLen = Math.max(1, Math.ceil((decoded.duration / playbackRate) * sampleRate));
+        const offline = new OfflineAudioContext(1, targetLen, sampleRate);
+        const src = offline.createBufferSource();
+        src.buffer = decoded;
+        src.playbackRate.value = playbackRate;
+        src.connect(offline.destination);
+        src.start(0);
+        const rendered = await offline.startRendering();
+        return rendered.getChannelData(0);
+    }
+
+    function concatVoiceClips(clips, sampleRate, gapSec = 0.04) {
+        const valid = clips.filter(c => c && c.length > 0);
+        if (!valid.length) return null;
+        const gapSamples = Math.floor(gapSec * sampleRate);
+        const totalLen = valid.reduce((acc, c, i) => acc + c.length + (i > 0 ? gapSamples : 0), 0);
+        const out = new Float32Array(totalLen);
+        let offset = 0;
+        valid.forEach((clip, i) => {
+            if (i > 0) offset += gapSamples;
+            out.set(clip, offset);
+            offset += clip.length;
+        });
+        return out;
+    }
+
+    async function loadSingleLocalVoiceClip(clipKey, sampleRate) {
+        const cleanKey = String(clipKey).toLowerCase().trim();
+        if (!cleanKey) return null;
+        const cacheId = `${sampleRate}:${cleanKey}`;
+        if (localClipCache[cacheId] !== undefined) return localClipCache[cacheId];
+
+        if (window.location.protocol === 'file:') {
+            localClipCache[cacheId] = null;
+            return null;
+        }
+
+        const basePath = getAssetsVoiceBasePath();
+        const extensions = ['mp3', 'wav', 'ogg'];
+
+        for (const ext of extensions) {
+            const url = `${basePath}/${encodeURIComponent(cleanKey)}.${ext}`;
+            try {
+                const resp = await fetch(url);
+                if (resp.ok) {
+                    const buf = await resp.arrayBuffer();
+                    const data = await decodeAudioBufferToMonoSamples(buf, sampleRate, 1.0);
+                    localClipCache[cacheId] = data;
+                    return data;
+                }
+            } catch (e) {
+                // Continuar probando extensiones
+            }
+        }
+
+        localClipCache[cacheId] = null;
+        return null;
+    }
+
+    // Programar locuciones nativas sincronizadas durante la reproducción del <audio> generado
+    let scheduledNativeTimers = [];
+    function clearScheduledNativeTimers() {
+        scheduledNativeTimers.forEach(id => clearTimeout(id));
+        scheduledNativeTimers = [];
+    }
+
+    function scheduleNativeCuesForAudioElement(audioEl, cues, voiceVol = 1.15) {
+        clearScheduledNativeTimers();
+        if (!audioEl || !Array.isArray(cues) || cues.length === 0 || !('speechSynthesis' in window)) return;
+
+        const syncCuesFromCurrentTime = () => {
+            clearScheduledNativeTimers();
+            if (audioEl.paused || audioEl.ended) return;
+            const nowPos = audioEl.currentTime || 0;
+            const rate = audioEl.playbackRate || 1;
+            for (const cue of cues) {
+                const deltaSec = (cue.timeSec - nowPos) / rate;
+                if (deltaSec >= -0.05) {
+                    const delayMs = Math.max(0, deltaSec * 1000);
+                    const tid = setTimeout(() => {
+                        if (!audioEl.paused && !audioEl.ended) {
+                            speakNativeNow(cue.text, voiceVol, 1.08);
+                        }
+                    }, delayMs);
+                    scheduledNativeTimers.push(tid);
+                }
+            }
+        };
+
+        audioEl.onplay = () => {
+            refreshNativeVoices();
+            syncCuesFromCurrentTime();
+        };
+        audioEl.onseeked = () => {
+            syncCuesFromCurrentTime();
+        };
+        audioEl.onratechange = () => {
+            syncCuesFromCurrentTime();
+        };
+        audioEl.onpause = () => {
+            clearScheduledNativeTimers();
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+        };
+        audioEl.onended = () => {
+            clearScheduledNativeTimers();
+        };
+    }
+
+    async function synthesizeSpanishSpeechToSamples(text, sampleRate) {
+        const cacheKey = `${sampleRate}:${text}`;
+        if (speechCache[cacheKey]) return speechCache[cacheKey];
+
+        const distMatch = text.match(/(\d+)\s*metros/i);
+        const paceMatch = text.match(/media[:\s]+(\d{3})/i);
+        const pieces = [];
+
+        if (distMatch) {
+            const dClip = await loadSingleLocalVoiceClip(`${distMatch[1]}_metros`, sampleRate);
+            if (dClip) pieces.push(dClip);
+        }
+        if (paceMatch) {
+            const pClip = await loadSingleLocalVoiceClip(`media_${paceMatch[1]}`, sampleRate);
+            if (pClip) pieces.push(pClip);
+        }
+
+        const resultSamples = pieces.length > 0 ? concatVoiceClips(pieces, sampleRate, 0.05) : null;
+        if (resultSamples) {
+            speechCache[cacheKey] = resultSamples;
+        }
+        return resultSamples;
+    }
+
+    function mixSamples(targetSamples, sourceSamples, startTimeSec, gain = 1.0) {
+        if (!sourceSamples) return;
+        const startIdx = Math.floor(startTimeSec * SAMPLE_RATE);
+        for (let i = 0; i < sourceSamples.length; i++) {
+            const idx = startIdx + i;
+            if (idx >= targetSamples.length) break;
+            targetSamples[idx] = Math.max(-1, Math.min(1, targetSamples[idx] + sourceSamples[i] * gain));
+        }
+    }
+
+    function shuffleArray(arr) {
+        const copy = arr.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    async function buildDecodedPlaylist(sampleRate, shuffle = false, crossfadeSec = 1.5) {
+        const orderedTracks = shuffle ? shuffleArray(playlistTracks) : playlistTracks.slice();
+        const decodedClips = [];
+
+        for (let i = 0; i < orderedTracks.length; i++) {
+            const tr = orderedTracks[i];
+            setProgress(55 + (i / Math.max(1, orderedTracks.length)) * 25, `Decodificando canción ${i + 1}/${orderedTracks.length}...`);
+            try {
+                const arrBuf = await tr.file.arrayBuffer();
+                const tempCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, sampleRate * 10, sampleRate);
+                const audioBuf = await tempCtx.decodeAudioData(arrBuf);
+                const offsetSec = Math.min(Math.max(0, tr.startOffsetSec || 0), Math.max(0, audioBuf.duration - 1));
+                const playDur = Math.max(0.5, audioBuf.duration - offsetSec);
+                const targetLen = Math.ceil(playDur * sampleRate);
+
+                const offline = new OfflineAudioContext(1, targetLen, sampleRate);
+                const src = offline.createBufferSource();
+                src.buffer = audioBuf;
+                src.connect(offline.destination);
+                src.start(0, offsetSec, playDur);
+                const rendered = await offline.startRendering();
+                const data = rendered.getChannelData(0);
+
+                // Aplicar fade in/out suave en cada pista
+                const fadeLen = Math.min(Math.floor(0.25 * sampleRate), Math.floor(data.length / 4));
+                for (let k = 0; k < fadeLen; k++) {
+                    const g = k / fadeLen;
+                    data[k] *= g;
+                    data[data.length - 1 - k] *= g;
+                }
+                decodedClips.push(data);
+            } catch (e) {
+                console.warn("Error decodificando pista:", tr.name, e);
+            }
+        }
+
+        if (!decodedClips.length) return null;
+
+        const xfSamples = Math.floor(crossfadeSec * sampleRate);
+        let totalLen = 0;
+        decodedClips.forEach((clip, idx) => {
+            if (idx === 0) totalLen += clip.length;
+            else totalLen += Math.max(1, clip.length - Math.min(xfSamples, Math.floor(clip.length / 3)));
+        });
+
+        const combined = new Float32Array(totalLen);
+        let cursor = 0;
+        for (let idx = 0; idx < decodedClips.length; idx++) {
+            const clip = decodedClips[idx];
+            const overlap = (idx > 0 && xfSamples > 0) ? Math.min(xfSamples, Math.floor(clip.length / 3), cursor) : 0;
+            const startAt = cursor - overlap;
+
+            for (let i = 0; i < clip.length; i++) {
+                const pos = startAt + i;
+                if (pos < 0 || pos >= combined.length) continue;
+                let w = 1.0;
+                if (overlap > 0 && i < overlap) {
+                    w = i / overlap; // Entrada suave durante el crossfade
+                }
+                combined[pos] += clip[i] * w;
+            }
+            cursor = startAt + clip.length;
+        }
+        return combined;
+    }
+
+    function mixBackgroundMusicWithDucking(mainSamples, playlistSamples, sampleRate, baseVol, duckRatio, activeIntervals) {
+        if (!playlistSamples || playlistSamples.length === 0 || baseVol <= 0) return;
+
+        const gainMask = new Float32Array(mainSamples.length);
+        gainMask.fill(1.0);
+
+        const padSec = 0.25;
+        for (const [startSec, endSec] of activeIntervals) {
+            const sIdx = Math.max(0, Math.floor((startSec - padSec) * sampleRate));
+            const eIdx = Math.min(mainSamples.length, Math.ceil((endSec + padSec) * sampleRate));
+            for (let i = sIdx; i < eIdx; i++) {
+                if (duckRatio < gainMask[i]) gainMask[i] = duckRatio;
+            }
+        }
+
+        const smoothWindow = Math.floor(0.045 * sampleRate);
+        if (smoothWindow > 1) {
+            let acc = gainMask[0];
+            for (let i = 1; i < gainMask.length; i++) {
+                acc += (gainMask[i] - acc) / smoothWindow;
+                gainMask[i] = acc;
+            }
+        }
+
+        const pLen = playlistSamples.length;
+        for (let i = 0; i < mainSamples.length; i++) {
+            const musicSample = playlistSamples[i % pLen] * baseVol * gainMask[i];
+            mainSamples[i] = Math.max(-1, Math.min(1, mainSamples[i] + musicSample));
+        }
+    }
+
+    // Limitador suave tipo soft-clipping con tanh para evitar picos estridentes y proteger el oído
+    function applySoftLimiter(samples, threshold = 0.88) {
+        const drive = 1 / threshold;
+        for (let i = 0; i < samples.length; i++) {
+            const x = samples[i];
+            if (Math.abs(x) > threshold) {
+                samples[i] = Math.tanh(x * drive) * threshold;
+            }
+        }
+    }
+
+    function encodeWAV(samples, sampleRate) {
+        const buffer = new ArrayBuffer(44 + samples.length * 2);
+        const view = new DataView(buffer);
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        writeString(view, 0, 'RIFF');
+        view.setUint32(4, 36 + samples.length * 2, true);
+        writeString(view, 8, 'WAVE');
+        writeString(view, 12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, 1, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 2, true);
+        view.setUint16(32, 2, true);
+        view.setUint16(34, 16, true);
+        writeString(view, 36, 'data');
+        view.setUint32(40, samples.length * 2, true);
+
+        let offset = 44;
+        for (let i = 0; i < samples.length; i++, offset += 2) {
+            const s = Math.max(-1, Math.min(1, samples[i]));
+            view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        }
+
+        return new Blob([view], { type: 'audio/wav' });
+    }
+
+    // Exportación comprimida opcional usando MediaRecorder cuando el navegador lo soporta
+    async function tryEncodeCompressedAudio(wavBlob) {
+        if (!window.MediaRecorder || !document.createElement('audio').canPlayType) return null;
+        const mimeTypes = ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/webm'];
+        const chosenMime = mimeTypes.find(m => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m));
+        if (!chosenMime) return null;
+
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const arrBuf = await wavBlob.arrayBuffer();
+            const audioBuf = await ctx.decodeAudioData(arrBuf);
+            const dest = ctx.createMediaStreamDestination();
+            const src = ctx.createBufferSource();
+            src.buffer = audioBuf;
+            src.connect(dest);
+
+            const recorder = new MediaRecorder(dest.stream, { mimeType: chosenMime, audioBitsPerSecond: 64000 });
+            const chunks = [];
+            recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+
+            const donePromise = new Promise(resolve => {
+                recorder.onstop = () => resolve(new Blob(chunks, { type: chosenMime }));
+            });
+
+            recorder.start();
+            src.start(0);
+            src.onended = () => {
+                setTimeout(() => {
+                    if (recorder.state !== 'inactive') recorder.stop();
+                }, 120);
+            };
+
+            const compressedBlob = await donePromise;
+            await ctx.close();
+            if (compressedBlob && compressedBlob.size > 0) {
+                const ext = chosenMime.includes('ogg') ? 'ogg' : 'webm';
+                return { blob: compressedBlob, ext };
+            }
+        } catch (e) {
+            console.warn("Compresión no disponible en este navegador:", e);
+        }
+        return null;
+    }
+
+    async function previewBeepAndVoice() {
+        const btn = document.getElementById('previewBtn');
+        btn.disabled = true;
+        btn.textContent = "⏳ Preparando prueba...";
+
+        try {
+            const firstSwim = blocks.find(b => b.type === 'swim') || { intervalSec: 25 };
+            const freq = parseFloat(document.getElementById('freq').value);
+            const beepDur = parseFloat(document.getElementById('beepDuration').value);
+            const beepVol = parseFloat(document.getElementById('beepVol').value);
+            const voiceVol = parseFloat(document.getElementById('voiceVol').value);
+            const announcePace = document.getElementById('announcePace').checked;
+            const announceDistance = document.getElementById('announceDistance').checked;
+
+            const pacePhrase = formatPaceSpoken(firstSwim.intervalSec);
+            let phrase = "";
+            if (announceDistance && announcePace) phrase = `100 metros. Media: ${pacePhrase}`;
+            else if (announcePace) phrase = `Media: ${pacePhrase}`;
+            else if (announceDistance) phrase = `100 metros`;
+
+            const voiceSamples = phrase ? await synthesizeSpanishSpeechToSamples(phrase, SAMPLE_RATE) : null;
+            const samples = new Float32Array(SAMPLE_RATE * 5);
+
+            addTone(samples, SAMPLE_RATE, 0.1, beepDur * 0.85, freq * 1.15, beepVol);
+            addTone(samples, SAMPLE_RATE, 0.1 + beepDur + 0.12, beepDur * 0.85, freq * 1.25, beepVol);
+
+            if (voiceSamples) {
+                mixSamples(samples, voiceSamples, 0.1 + beepDur * 2 + 0.35, voiceVol);
+            }
+
+            if (document.getElementById('softLimiter').checked) applySoftLimiter(samples);
+            const wavBlob = encodeWAV(samples, SAMPLE_RATE);
+            const audio = new Audio(URL.createObjectURL(wavBlob));
+            audio.play().catch(() => {});
+            if (phrase && !voiceSamples && 'speechSynthesis' in window) {
+                const delayMs = Math.round((0.1 + beepDur * 2 + 0.35) * 1000);
+                setTimeout(() => speakNativeNow(phrase, voiceVol, 1.05), delayMs);
+            }
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "🔊 Escuchar prueba de pitido + voz";
+        }
+    }
+
+    async function generateAudio() {
+        const timeline = buildTimeline();
+        if (timeline.totalDurationSec <= 0) {
+            alert("Añade al menos un bloque con duración mayor que 0.");
+            return;
+        }
+
+        const enableMusic = document.getElementById('enableMusic').checked;
+        if (enableMusic && playlistTracks.length === 0) {
+            alert("Añade al menos una canción a la lista o desactiva la música de fondo.");
+            return;
+        }
+
+        const freq = parseFloat(document.getElementById('freq').value);
+        const beepDur = parseFloat(document.getElementById('beepDuration').value);
+        const beepVol = parseFloat(document.getElementById('beepVol').value);
+        const voiceVol = parseFloat(document.getElementById('voiceVol').value);
+        const softLimiter = document.getElementById('softLimiter').checked;
+
+        const doubleBeep4 = document.getElementById('doubleBeepEvery4').checked;
+        const announcePace = document.getElementById('announcePace').checked;
+        const announceDistance = document.getElementById('announceDistance').checked;
+        const announceHalfway = document.getElementById('announceHalfway').checked;
+        const announceBlockChanges = document.getElementById('announceBlockChanges').checked;
+        const announceFinalTotal = document.getElementById('announceFinalTotal').checked;
+        const countdown = document.getElementById('countdownStart').checked;
+
+        const musicVol = parseFloat(document.getElementById('musicVol').value);
+        const duckingFactor = parseFloat(document.getElementById('duckingFactor').value);
+        const shuffleMusic = document.getElementById('shuffleMusic').checked;
+        const crossfadeSec = parseFloat(document.getElementById('crossfadeSec').value);
+
+        const btn = document.getElementById('generateBtn');
+        const prevBtn = document.getElementById('previewBtn');
+        btn.disabled = true;
+        prevBtn.disabled = true;
+        btn.textContent = "⏳ Generando sesión...";
+        setProgress(5, "Construyendo línea de tiempo...");
+
+        try {
+            const leadIn = countdown ? 10.0 : 0.5;
+            const totalWorkoutSec = timeline.totalDurationSec;
+            const totalSec = leadIn + totalWorkoutSec + 8.0;
+
+            const samples = new Float32Array(Math.ceil(totalSec * SAMPLE_RATE));
+            const activeIntervals = [];
+            const nativeCues = [];
+            let offlineUsed = false;
+
+            // 1. Cuenta atrás inicial con voz nativa (o clip local si existe)
+            if (countdown) {
+                for (let n = 10; n >= 0; n--) {
+                    const secOffset = (10 - n) * 1.0;
+                    const cClip = await loadSingleLocalVoiceClip(`cuenta_${n}`, SAMPLE_RATE);
+                    if (cClip) {
+                        mixSamples(samples, cClip, secOffset, voiceVol);
+                    } else {
+                        nativeCues.push({ timeSec: secOffset, text: String(n) });
+                    }
+                }
+                activeIntervals.push([0.0, 10.6]);
+            }
+
+            // 2. Pitido de salida
+            addTone(samples, SAMPLE_RATE, leadIn, beepDur * 1.3, freq * 1.15, beepVol);
+            activeIntervals.push([leadIn, leadIn + beepDur * 1.3]);
+
+            setProgress(15, "Procesando bloques y descansos...");
+
+            // 3. Avisos de bloque nuevo, pausa y reiniciar pausa
+            if (announceBlockChanges) {
+                for (const ev of timeline.events) {
+                    if (ev.type === 'block_start') {
+                        const t = leadIn + ev.time;
+                        const isRest = ev.block.type === 'rest';
+
+                        if (ev.blockIndex > 0) {
+                            const clipKey = isRest ? 'pausa' : 'bloque_nuevo';
+                            const blkVoice = await loadSingleLocalVoiceClip(clipKey, SAMPLE_RATE);
+                            if (blkVoice) {
+                                mixSamples(samples, blkVoice, t, voiceVol);
+                                activeIntervals.push([t, t + blkVoice.length / SAMPLE_RATE]);
+                            } else {
+                                nativeCues.push({ timeSec: t, text: isRest ? 'Pausa' : 'Bloque nuevo' });
+                                activeIntervals.push([t, t + 0.85]);
+                            }
+                        } else if (isRest) {
+                            const pauseClip = await loadSingleLocalVoiceClip('pausa', SAMPLE_RATE);
+                            if (pauseClip) {
+                                mixSamples(samples, pauseClip, t, voiceVol);
+                                activeIntervals.push([t, t + pauseClip.length / SAMPLE_RATE]);
+                            } else {
+                                nativeCues.push({ timeSec: t, text: 'Pausa' });
+                                activeIntervals.push([t, t + 0.75]);
+                            }
+                        }
+
+                        // Cuenta atrás de últimos 3 segundos y aviso de reiniciar pausa al terminar el descanso
+                        if (isRest && computeBlockDurationSec(ev.block) >= 4) {
+                            const restEnd = leadIn + ev.endTime;
+                            for (let s = 3; s >= 1; s--) {
+                                const bTime = restEnd - s;
+                                if (bTime > t + 0.8) {
+                                    nativeCues.push({ timeSec: bTime, text: String(s) });
+                                    activeIntervals.push([bTime, bTime + 0.55]);
+                                }
+                            }
+                            const restartClip = await loadSingleLocalVoiceClip('reiniciar_pausa', SAMPLE_RATE);
+                            if (restartClip) {
+                                mixSamples(samples, restartClip, restEnd, voiceVol);
+                                activeIntervals.push([restEnd, restEnd + restartClip.length / SAMPLE_RATE]);
+                            } else {
+                                nativeCues.push({ timeSec: restEnd, text: 'Reiniciar pausa' });
+                                activeIntervals.push([restEnd, restEnd + 0.95]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 4. Aviso a mitad de sesión (voz local si existe; si no, doble tono armónico distintivo)
+            const halfwaySec = totalWorkoutSec / 2;
+            let halfwayAnnounced = false;
+            if (announceHalfway && totalWorkoutSec >= 120) {
+                const lapsAtHalf = timeline.events.filter(e => e.type === 'lap' && e.time <= halfwaySec + 0.01);
+                const metersAtHalf = lapsAtHalf.length * poolLength;
+                const tHalf = leadIn + halfwaySec + 0.5;
+                const halfClip = await loadSingleLocalVoiceClip('mitad_sesion', SAMPLE_RATE);
+                const distClip = metersAtHalf > 0 ? await loadSingleLocalVoiceClip(`${metersAtHalf}_metros`, SAMPLE_RATE) : null;
+                const halfVoice = concatVoiceClips([halfClip, distClip], SAMPLE_RATE, 0.06);
+
+                if (halfVoice) {
+                    mixSamples(samples, halfVoice, tHalf, voiceVol);
+                    activeIntervals.push([tHalf, tHalf + halfVoice.length / SAMPLE_RATE]);
+                    halfwayAnnounced = true;
+                } else {
+                    const halfPhrase = metersAtHalf > 0
+                        ? `Mitad de sesión, ${metersAtHalf} metros`
+                        : 'Mitad de sesión';
+                    nativeCues.push({ timeSec: tHalf, text: halfPhrase });
+                    activeIntervals.push([tHalf, tHalf + 1.4]);
+                    halfwayAnnounced = true;
+                }
+            }
+
+            // 5. Largos de piscina y avisos cada 100 m
+            const lapEvents = timeline.events.filter(e => e.type === 'lap');
+
+            for (let i = 0; i < lapEvents.length; i++) {
+                if (i % 10 === 0) {
+                    setProgress(20 + (i / Math.max(1, lapEvents.length)) * 32, `Sintetizando avisos (${i}/${lapEvents.length} largos)...`);
+                }
+                const ev = lapEvents[i];
+                const currentTime = leadIn + ev.time;
+                const isFinalLap = (i === lapEvents.length - 1);
+
+                if (isFinalLap && announceFinalTotal && Math.abs(totalWorkoutSec - ev.time) < 1.2) {
+                    continue;
+                }
+
+                if (doubleBeep4 && ev.is100m) {
+                    addTone(samples, SAMPLE_RATE, currentTime, beepDur * 0.85, freq * 1.15, beepVol);
+                    addTone(samples, SAMPLE_RATE, currentTime + beepDur + 0.12, beepDur * 0.85, freq * 1.25, beepVol);
+
+                    const nearHalfway = halfwayAnnounced && Math.abs(ev.time - halfwaySec) < 3.0;
+                    if (!nearHalfway && (announceDistance || announcePace)) {
+                        const voiceCursor = currentTime + (beepDur * 2) + 0.30;
+                        const pieces = [];
+                        if (announceDistance) {
+                            const distClip = await loadSingleLocalVoiceClip(`${ev.meters}_metros`, SAMPLE_RATE);
+                            if (distClip) pieces.push(distClip);
+                        }
+                        if (announcePace) {
+                            const paceCode = formatPaceSpoken(ev.currentInterval);
+                            const mediaClip = await loadSingleLocalVoiceClip(`media_${paceCode}`, SAMPLE_RATE);
+                            if (mediaClip) pieces.push(mediaClip);
+                        }
+                        const vSamples = pieces.length > 0 ? concatVoiceClips(pieces, SAMPLE_RATE, 0.05) : null;
+
+                        if (vSamples) {
+                            mixSamples(samples, vSamples, voiceCursor, voiceVol);
+                            activeIntervals.push([currentTime, voiceCursor + vSamples.length / SAMPLE_RATE]);
+                        } else {
+                            const spokenParts = [];
+                            if (announceDistance) spokenParts.push(`${ev.meters} metros`);
+                            if (announcePace) spokenParts.push(`media ${formatPaceMMSS(ev.currentInterval)}`);
+                            if (spokenParts.length > 0) {
+                                nativeCues.push({ timeSec: voiceCursor, text: spokenParts.join(', ') });
+                                activeIntervals.push([currentTime, voiceCursor + 1.5]);
+                            }
+                        }
+                    }
+                } else {
+                    addTone(samples, SAMPLE_RATE, currentTime, beepDur, freq, beepVol);
+                    activeIntervals.push([currentTime, currentTime + beepDur]);
+                }
+            }
+
+            // 6. Aviso final
+            if (announceFinalTotal) {
+                const endTime = leadIn + totalWorkoutSec;
+                addTone(samples, SAMPLE_RATE, endTime, beepDur * 0.8, freq, beepVol);
+                addTone(samples, SAMPLE_RATE, endTime + beepDur + 0.10, beepDur * 0.8, freq * 1.18, beepVol);
+                addTone(samples, SAMPLE_RATE, endTime + (beepDur + 0.10) * 2, beepDur * 1.25, freq * 1.35, Math.min(1.0, beepVol * 1.1));
+
+                const finalVoiceStart = endTime + (beepDur + 0.10) * 2 + beepDur * 1.25 + 0.35;
+                const finalText = `Tiempo completado. Distancia total: ${timeline.totalMeters} metros.`;
+                const finalVoice = await synthesizeSpanishSpeechToSamples(finalText, SAMPLE_RATE);
+                if (finalVoice) {
+                    mixSamples(samples, finalVoice, finalVoiceStart, voiceVol);
+                    activeIntervals.push([endTime, finalVoiceStart + finalVoice.length / SAMPLE_RATE]);
+                } else {
+                    nativeCues.push({ timeSec: finalVoiceStart, text: finalText });
+                    activeIntervals.push([endTime, finalVoiceStart + 2.0]);
+                }
+            }
+
+            // 7. Música de fondo con bucle, crossfade y ducking
+            if (enableMusic && playlistTracks.length > 0) {
+                const playlistSamples = await buildDecodedPlaylist(SAMPLE_RATE, shuffleMusic, crossfadeSec);
+                if (playlistSamples) {
+                    setProgress(82, "Mezclando música y aplicando atenuación...");
+                    mixBackgroundMusicWithDucking(samples, playlistSamples, SAMPLE_RATE, musicVol, duckingFactor, activeIntervals);
+                }
+            }
+
+            // 8. Limitador suave y codificación WAV
+            setProgress(90, "Aplicando protección auditiva y codificando WAV...");
+            if (softLimiter) applySoftLimiter(samples);
+
+            const wavBlob = encodeWAV(samples, SAMPLE_RATE);
+            const wavUrl = URL.createObjectURL(wavBlob);
+
+            const player = document.getElementById('audioPlayer');
+            player.src = wavUrl;
+            scheduleNativeCuesForAudioElement(player, nativeCues, voiceVol);
+
+            const totalMinLabel = Math.round(totalWorkoutSec / 60);
+            const wavLink = document.getElementById('downloadWavLink');
+            wavLink.href = wavUrl;
+            wavLink.download = `natacion_${poolLength}m_${timeline.totalMeters}m_${totalMinLabel}min.wav`;
+
+            // 9. Opción comprimida si está disponible en el navegador (con timeout de seguridad para evitar bloqueos al 95%)
+            const compLink = document.getElementById('downloadCompressedLink');
+            compLink.style.display = 'none';
+            let compInfo = "";
+            if (totalSec <= 1800) { // Evitar esperas largas en tiempo real en sesiones de más de 30 min
+                setProgress(95, "Generando versión comprimida ligera...");
+                try {
+                    const compPromise = tryEncodeCompressedAudio(wavBlob);
+                    const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 5000));
+                    const compResult = await Promise.race([compPromise, timeoutPromise]);
+                    if (compResult) {
+                        const compUrl = URL.createObjectURL(compResult.blob);
+                        compLink.href = compUrl;
+                        compLink.download = `natacion_${poolLength}m_${timeline.totalMeters}m_${totalMinLabel}min.${compResult.ext}`;
+                        compLink.textContent = `⬇️ Descargar .${compResult.ext.toUpperCase()} (Ligero)`;
+                        compLink.style.display = 'inline-block';
+                        compInfo = ` | Versión .${compResult.ext.toUpperCase()}: ${(compResult.blob.size / (1024 * 1024)).toFixed(2)} MB`;
+                    }
+                } catch (compErr) {
+                    console.warn("Omitiendo versión comprimida:", compErr);
+                }
+            }
+
+            const sizeMB = (wavBlob.size / (1024 * 1024)).toFixed(2);
+            const voiceModeNote = nativeCues.length > 0
+                ? ` | Voz nativa del navegador activa (${nativeCues.length} avisos sincronizados, sin localhost).`
+                : ` | Voces locales cargadas.`;
+            const infoSummary = `WAV Mono 16kHz: ${sizeMB} MB${compInfo}${voiceModeNote}`;
+            document.getElementById('fileInfo').textContent = infoSummary;
+            document.getElementById('resultBox').style.display = 'block';
+
+            const savedList = loadTemplates();
+            const activeTpl = savedList[selectedSessionIndex];
+            if (activeTpl) {
+                sessionAudioMap[activeTpl.name] = {
+                    wavUrl: wavUrl,
+                    wavFilename: wavLink.download,
+                    infoText: infoSummary
+                };
+                renderTemplates();
+            }
+            setProgress(100, "¡Completado!");
+            setTimeout(hideProgress, 1200);
+        } catch (e) {
+            alert("Error al generar el audio. Revisa la duración de los bloques o los archivos de audio.");
+            console.error(e);
+            hideProgress();
+        } finally {
+            btn.disabled = false;
+            prevBtn.disabled = false;
+            btn.textContent = "⚙️ Generar Audio Descargable";
+        }
+    }
+
+    renderTemplates();
+    renderBlocks();
+    renderTrackList();
+    preloadAssetsVoices();
+</script>
+
+</body>
+</html>
